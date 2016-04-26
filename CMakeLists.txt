@@ -1,6 +1,16 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.2)
 project(maild)
 
-add_executable(maild main.cpp)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pedantic -Wextra")
 
-install(TARGETS maild RUNTIME DESTINATION bin)
+SET(MAILD_VERSION_MAJOR "0")
+SET(MAILD_VERSION_MINOR "0")
+SET(MAILD_VERSION_PATCH "1")
+
+add_definitions(-DMAILD_VERSION="${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
+
+add_subdirectory(lib)
+add_subdirectory(app)
+add_subdirectory(test)
+
