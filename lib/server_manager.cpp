@@ -14,6 +14,6 @@ server_manager::server_manager(const server_options& options):options(options)
 void server_manager::run()
 {
     boost::asio::io_service io_service;
-    smtp_server server(io_service,options.get_plain_port());    
+    smtp_server server(io_service,options);    
     io_service.run();
 }

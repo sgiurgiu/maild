@@ -3,7 +3,7 @@ project(libmaild_test)
 include_directories(${CMAKE_SOURCE_DIR}/lib ${CMAKE_CURRENT_SOURCE_DIR}/external)
 
 set(LIBMAILD_TEST_SRCS 
-
+    test_utils.cpp
   external/gmock-gtest-all.cc 
   external/gmock_main.cc)
 

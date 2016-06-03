@@ -14,6 +14,7 @@ struct options
     bool quiet=false;
     bool verbose=false;
     bool version=false;
+    bool daemon = false;
 };
 
 

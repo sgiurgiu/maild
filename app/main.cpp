@@ -11,6 +11,8 @@
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/logger.h>
 
+#include <unistd.h>
+
 using namespace maild;
 
 int main(int argc, char **argv) {
@@ -41,7 +43,7 @@ int main(int argc, char **argv) {
     }
     else
     {
-        log4cxx::PropertyConfigurator::configure(argv[1]);
+        log4cxx::PropertyConfigurator::configure(arguments.log_file);
     }
     log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
     if(arguments.verbose)
@@ -71,7 +73,14 @@ int main(int argc, char **argv) {
         std::cerr << ex.what() << std::endl;
         return 1;
     }
-    
+    if(arguments.daemon)
+    {
+        if(daemon(0,0))
+        {
+            LOG4CXX_FATAL(logger, "Cannot run in the background");
+            return 1;
+        }
+    }
     try
     {
         LOG4CXX_INFO(logger, "Starting MailD server...")
@@ -84,6 +93,11 @@ int main(int argc, char **argv) {
         std::cerr << ex.what() << std::endl;
         LOG4CXX_ERROR(logger, "Error occurred, shutting down. Cause: "<<ex.what())
         return 1;
+    }
+    catch(...)
+    {
+      LOG4CXX_ERROR(logger, "Error occurred, shutting down.")
+      return 1;
     }
     
     return 0;
