@@ -57,16 +57,16 @@ void smtp_server::handle_accept(session_ptr new_session, const boost::system::er
 
 void smtp_server::remove_session(session* s)
 {
+  mail mail_message = s->get_mail_message();
+  save_message(mail_message);
     ao.send([this,s](){
         
         std::shared_ptr<session> dummy_ptr(s, [](session*){});//won't delete
         auto it = sessions.find(dummy_ptr);
         if(it != sessions.end())
-        {
-            mail mail_message = (*it)->get_mail_message();
+        {            
             sessions.erase(it);
-            LOG4CXX_DEBUG(logger, "Sessions count "<<sessions.size());
-            save_message(mail_message);
+            LOG4CXX_DEBUG(logger, "Sessions count "<<sessions.size());            
         }
     });
 }

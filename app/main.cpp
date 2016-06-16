@@ -20,12 +20,6 @@ server_manager manager;
 void handle_signal(int sig)
 {
   manager.stop();
-  log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
-  logger->closeNestedAppenders();
-  logger->removeAllAppenders();
-  delete logger;
-  signal (sig, SIG_DFL);
-  raise (sig);
 }
 
 int main(int argc, char **argv) {
