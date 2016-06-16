@@ -40,6 +40,14 @@ void server_options::load(std::istream& conf_stream)
           secure_port = secure_it->second.get("port").get<int64_t>();
       }
   }
+  picojson::value ips_value = conf_value.get("ips");
+  if(ips_value.is<picojson::array>())
+  {
+      for(const auto& ip_value : ips_value.get<picojson::array>())
+      {
+          ips.insert(ip_value.get<std::string>());
+      }
+  }
 }
 
 int server_options::get_plain_port() const
@@ -55,4 +63,9 @@ std::string server_options::get_db_connection_string() const
 std::string server_options::get_domain_name() const
 {
   return domain_name;
+}
+
+std::set<std::string> server_options::get_ips() const
+{
+  return ips;
 }

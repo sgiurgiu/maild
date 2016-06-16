@@ -13,8 +13,6 @@ template < class T, class Container = std::vector<T> > class sync_queue
 private:
   mutable std::mutex m;
   std::condition_variable condition;
-  sync_queue& operator=(const sync_queue&) = delete;
-  sync_queue(const sync_queue& other) = delete;
 
 protected:
   Container c;
@@ -22,6 +20,11 @@ public:
   explicit
       sync_queue(const Container& container = Container()):  c(container)
       { }
+      sync_queue& operator=(const sync_queue&) = delete;
+      sync_queue(const sync_queue& other) = delete;
+      sync_queue& operator=(sync_queue&&) = delete;
+      sync_queue(sync_queue&& other) = delete;
+
       typedef typename Container::value_type                value_type;
       typedef typename Container::reference                 reference;
       typedef typename Container::const_reference           const_reference;

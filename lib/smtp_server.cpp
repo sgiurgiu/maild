@@ -11,8 +11,8 @@ using boost::asio::ip::tcp;
 
 log4cxx::LoggerPtr smtp_server::logger(log4cxx::Logger::getLogger("smtp_server"));
 
-smtp_server::smtp_server(boost::asio::io_service& io_service,  const server_options& options) 
-    : options(options), acceptor(io_service,tcp::endpoint(tcp::v4(),options.get_plain_port())),
+smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string& listen_address, const server_options& options)
+    : options(options), acceptor(io_service,tcp::endpoint(boost::asio::ip::address::from_string(listen_address),options.get_plain_port())),
       db(options.get_db_connection_string())
 {
   db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,$4,$5)");

@@ -16,12 +16,12 @@ class active_object
 {
 public:
     typedef std::function<void()> message;
-private:
     active_object ( const active_object& ) = delete;
     active_object ( active_object&& ) = delete;
     active_object& operator= ( const active_object& ) = delete;
     active_object& operator= (active_object&& ) = delete;
 
+private:
     bool done;
     sync_queue<message> messages;
     std::thread workingThread;

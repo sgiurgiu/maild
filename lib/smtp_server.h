@@ -18,7 +18,7 @@ namespace maild {
 class smtp_server
 {
 public:
-    smtp_server(boost::asio::io_service& io_service, const server_options& options);    
+    smtp_server(boost::asio::io_service& io_service,const std::string& listen_address, const server_options& options);
     ~smtp_server();
     smtp_server ( const smtp_server& ) = delete;
     smtp_server (smtp_server&& ) = delete;

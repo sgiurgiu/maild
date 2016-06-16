@@ -17,7 +17,7 @@
 using namespace maild;
 server_manager manager;
 
-void handle_signal(int sig)
+void handle_signal(int /*sig*/)
 {
   manager.stop();
 }
