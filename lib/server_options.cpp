@@ -21,6 +21,8 @@ void server_options::load(std::istream& conf_stream)
   const picojson::object& obj = conf_value.get<picojson::object>();
   db_connection_string = obj.at("database_url").get<std::string>();
   domain_name = obj.at("domain").get<std::string>();
+  keep_mail_seconds = obj.at("keep_mail").get<int64_t>();
+  check_mail_interval_seconds = obj.at("check_mail_interval").get<int64_t>();
   auto plain_it = obj.find("plain");
   if(plain_it != obj.end())
   {
@@ -67,5 +69,15 @@ std::string server_options::get_domain_name() const
 
 std::set<std::string> server_options::get_ips() const
 {
-  return ips;
+    return ips;
+}
+
+int64_t server_options::get_keep_mail_seconds() const
+{
+    return keep_mail_seconds;
+}
+
+int64_t server_options::get_check_mail_interval_seconds() const
+{
+    return check_mail_interval_seconds;
 }

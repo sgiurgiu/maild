@@ -4,7 +4,7 @@ project(libmaild)
 set(Boost_USE_STATIC_LIBS        OFF)
 set(Boost_USE_MULTITHREADED      ON)
 
-find_package(Boost 1.58 REQUIRED system filesystem)
+find_package(Boost 1.55 REQUIRED system filesystem)
 find_package(OpenSSL REQUIRED)
 find_library(LOG4CXX_LIBS log4cxx)
 find_library(PSQLCXX_LIBS pqxx)

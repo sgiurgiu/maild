@@ -16,7 +16,11 @@ public:
     std::string get_db_connection_string() const;
     std::string get_domain_name() const;
     std::set<std::string> get_ips() const;
+    int64_t get_keep_mail_seconds() const;
+    int64_t get_check_mail_interval_seconds() const;
 private:    
+    int64_t keep_mail_seconds = 60;
+    int64_t check_mail_interval_seconds = 5;
     int plain_port = 25;
     int secure_port = 465;
     bool plain_enabled = true;
