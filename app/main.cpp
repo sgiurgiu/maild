@@ -12,8 +12,21 @@
 #include <log4cxx/logger.h>
 
 #include <unistd.h>
+#include <signal.h>
 
 using namespace maild;
+server_manager manager;
+
+void handle_signal(int sig)
+{
+  manager.stop();
+  log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
+  logger->closeNestedAppenders();
+  logger->removeAllAppenders();
+  delete logger;
+  signal (sig, SIG_DFL);
+  raise (sig);
+}
 
 int main(int argc, char **argv) {
     options_parser parser;
@@ -81,10 +94,16 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
+
+    signal (SIGQUIT, handle_signal);
+    signal (SIGABRT, handle_signal);
+    signal (SIGINT, handle_signal);
+    signal (SIGTERM, handle_signal);
+
     try
     {
-        LOG4CXX_INFO(logger, "Starting MailD server...")
-        server_manager manager(options);
+        LOG4CXX_INFO(logger, "Starting MailD server...")        
+        manager.set_options(options);
         manager.run();
         LOG4CXX_INFO(logger, "Stopping MailD server...")
     }
