@@ -1,4 +1,7 @@
 build/
 *.kdev4
 .kdev4/
+.vscode/
+CMakeLists.txt.user
+logs/
 
