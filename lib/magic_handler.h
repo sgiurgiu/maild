@@ -3,6 +3,7 @@
 
 #include <magic.h>
 #include <memory>
+#include <string>
 
 namespace maild {
 struct magic_deleter
