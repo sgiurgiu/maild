@@ -44,3 +44,5 @@ target_link_libraries(${PROJECT_NAME} ${MAGIC_LIB})
 if (Tcmalloc_FOUND)
     target_link_libraries(${PROJECT_NAME} ${Tcmalloc_LIBRARIES})
 endif(Tcmalloc_FOUND)
+
+install(TARGETS ${PROJECT_NAME}  LIBRARY DESTINATION lib)
