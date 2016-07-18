@@ -1,0 +1,11 @@
+body {
+  padding-top: 10px;
+}
+.container-mode {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.selectable {
+    cursor: pointer; cursor: hand;
+}

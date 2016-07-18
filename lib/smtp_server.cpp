@@ -15,8 +15,7 @@ smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string&
     : options(options), acceptor(io_service,tcp::endpoint(boost::asio::ip::address::from_string(listen_address),options.get_plain_port())),
       db(options.get_db_connection_string())
 {
-  db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");
-  log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("smtp_server"));
+  db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");  
   LOG4CXX_INFO(logger, "Starting to accept connections on port "<<options.get_plain_port());
   start_accept();
 }
@@ -59,7 +58,7 @@ void smtp_server::remove_session(session* s)
 {
   mail mail_message = s->get_mail_message();
   save_message(mail_message);
-    ao.send([this,s](){
+  ao.send([this,s](){
         
         std::shared_ptr<session> dummy_ptr(s, [](session*){});//won't delete
         auto it = sessions.find(dummy_ptr);

@@ -33,25 +33,42 @@ void server_manager::start_cleanup_thread()
 {
     if(cleanup_thread_created) return;
     cleanup_thread = std::thread([this](){
-        pqxx::connection db(options.get_db_connection_string());
-        db.prepare("delete_mail","delete from mails where date_received <= $1");
-        while(!cleanup_done.load())
+        try
         {
-            std::this_thread::sleep_for(std::chrono::seconds(options.get_check_mail_interval_seconds()));
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now () ;
-            std::time_t obsolete_time_t = std::chrono::system_clock::to_time_t(now - std::chrono::seconds(options.get_keep_mail_seconds()));
-            std::tm tm = *std::localtime(&obsolete_time_t);
-            std::stringstream time_str;
-            time_str<<std::put_time(&tm, "%F %T %z");
-            pqxx::work w(db);
-            pqxx::result result = w.prepared("delete_mail")
-                (time_str.str())
-                .exec();
-            w.commit();
+            pqxx::connection db(options.get_db_connection_string());
+            db.prepare("delete_mail","delete from mails where date_received <= $1");
+            while(!cleanup_done.load())
+            {
+                std::this_thread::sleep_for(std::chrono::seconds(options.get_check_mail_interval_seconds()));
+                std::chrono::system_clock::time_point now = std::chrono::system_clock::now () ;
+                std::time_t obsolete_time_t = std::chrono::system_clock::to_time_t(now - std::chrono::seconds(options.get_keep_mail_seconds()));
+                std::tm tm = *std::localtime(&obsolete_time_t);
+                std::stringstream time_str;
+                time_str<<std::put_time(&tm, "%F %T %z");
+                pqxx::work w(db);
+                pqxx::result result = w.prepared("delete_mail")
+                    (time_str.str())
+                    .exec();
+                w.commit();
+                if(!cleanup_done.load())
+                {
+                    LOG4CXX_INFO(logger, "Deleted "<<result.affected_rows()<<" mails older than "<<time_str.str());
+                }
+            }
+        } 
+        catch(const std::exception& ex)
+        {
             if(!cleanup_done.load())
             {
-                LOG4CXX_INFO(logger, "Deleted "<<result.affected_rows()<<" mails older than "<<time_str.str());
-            }
+                LOG4CXX_ERROR(logger, "Deleting rows encountered an exception: "<<ex.what());
+            }            
+        }
+        catch(...)
+        {
+            if(!cleanup_done.load())
+            {
+                LOG4CXX_ERROR(logger, "Deleting rows encountered an unknown exception");
+            }            
         }
 
     });
@@ -76,6 +93,7 @@ void server_manager::run()
 
 void server_manager::stop()
 {
+  LOG4CXX_INFO(logger, "Received stop command.");
   io_service.stop();
   cleanup_done.store(true);
 }
