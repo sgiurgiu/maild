@@ -26,7 +26,10 @@ server_manager::server_manager()
 server_manager::~server_manager()
 {
     cleanup_done.store(true);
-    cleanup_thread.join();
+    if(cleanup_thread.joinable())
+    {
+        cleanup_thread.join();
+    }
 }
 
 void server_manager::start_cleanup_thread()
