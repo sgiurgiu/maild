@@ -105,11 +105,13 @@ int main(int argc, char **argv) {
     {
         std::cerr << ex.what() << std::endl;
         LOG4CXX_ERROR(logger, "Error occurred, shutting down. Cause: "<<ex.what())
+        manager.stop();
         return 1;
     }
     catch(...)
     {
       LOG4CXX_ERROR(logger, "Error occurred, shutting down.")
+      manager.stop();
       return 1;
     }
     
