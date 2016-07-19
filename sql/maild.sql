@@ -9,6 +9,8 @@ alter table mails add column username varchar(200);
 GRANT INSERT ON TABLE mails to maild;
 GRANT DELETE ON TABLE mails  to maild;
 
-GRANT SELECT ON ALL SEQUENCES IN SCHEMA  maild to maild;
+#GRANT SELECT ON ALL SEQUENCES IN SCHEMA  maild to maild;
+grant usage,select on sequence mails_id_seq to maild_smtp;
+
 GRANT CONNECT ON DATABASE maild to maild;
 

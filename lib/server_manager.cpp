@@ -25,6 +25,7 @@ server_manager::server_manager()
 }
 server_manager::~server_manager()
 {
+    stop();
     cleanup_done.store(true);
     if(cleanup_thread.joinable())
     {
