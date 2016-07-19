@@ -16,8 +16,9 @@ smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string&
       db(options.get_db_connection_string())
 {
   db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");  
-  LOG4CXX_INFO(logger, "Starting to accept connections on port "<<options.get_plain_port());
-  start_accept();
+  
+  LOG4CXX_INFO(logger, "Starting to accept connections on address "<<listen_address<<" and port "<<options.get_plain_port());
+  start_accept(); 
 }
 
 smtp_server::~smtp_server()
