@@ -23,8 +23,10 @@ function retrieve_and_show_mail() {
             
             var date_received = data[i]['date'];
             var mom_date = moment.utc(date_received, "YYYY-MM-DD HH:mm:ss.SSS");
-            $('#email_list > tbody:last-child').append('<tr class="selectable" onclick="showEmailContents('+id+')"> <td>'+from+'</td><td>'+subject+'</td> <td>'+mom_date.local().format('dddd, MMMM Do YYYY, HH:mm:ss')+'</td></tr>');
-            $('#email_list > tbody:last-child').append('<tr style="display: none" id="email_body_'+id+'" > <td colspan="3"><pre>'+$('<div/>').text(body).html()+'</pre></td></tr>');
+            var local_date = mom_date.local().format('dddd, MMMM Do YYYY, HH:mm:ss');
+            var escaped_body = $('<div/>').text(body).html();
+            $('#email_list > tbody:last-child').append('<tr class="selectable" onclick="showEmailContents('+id+')"> <td>'+from+'</td><td>'+subject+'</td> <td>'+local_date+'</td></tr>');
+            $('#email_list > tbody:last-child').append('<tr style="display: none" id="email_body_'+id+'" > <td colspan="3"><pre>'+escaped_body+'</pre></td></tr>');
         }
         
         $('#collapse_email_list').collapse('show');    
