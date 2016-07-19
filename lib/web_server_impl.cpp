@@ -18,6 +18,7 @@ void web_server_impl::run()
 {
     app = std::make_unique<crow::SimpleApp>();
     web_file_server file_server(options.get_files_dir());
+    LOG4CXX_DEBUG(logger, "DB connection string "<<options.get_db_connection_string());
     web_api_server api_server(options.get_db_connection_string());
     
     CROW_ROUTE((*app),"/api/mails/<string>")    
