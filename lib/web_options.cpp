@@ -27,8 +27,9 @@ void web_options::load(std::istream& conf_stream)
   picojson::value ips_value = conf_value.get("ips");
   if(ips_value.is<picojson::array>())
   {
+      ips.clear();
       for(const auto& ip_value : ips_value.get<picojson::array>())
-      {
+      {          
           ips.insert(ip_value.get<std::string>());
       }
   }

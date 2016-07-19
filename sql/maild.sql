@@ -14,3 +14,5 @@ grant usage,select on sequence mails_id_seq to maild_smtp;
 
 GRANT CONNECT ON DATABASE maild to maild;
 
+GRANT USAGE on SCHEMA public to maild_web;
+GRANT SELECT on TABLE mails TO maild_smtp;
