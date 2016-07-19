@@ -48,11 +48,13 @@ void web_server_impl::run()
         return file_server.get_file_contents("index.html");
     });
     
-    app->port(options.get_port());
     for(const auto& ip : options.get_ips())
     {
+        LOG4CXX_INFO(logger, "Binding to ip "<<ip);
         app->bindaddr(ip);
     }
+    app->port(options.get_port());
+    LOG4CXX_INFO(logger, "Listening on port "<<options.get_port());
     
     app->multithreaded().run();
 }
