@@ -20,7 +20,7 @@ using namespace maild;
 
 web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_string)
 {
-    db.prepare("get_users_mails","select from_address,to_address,body,date_received,id from mails where username=$1 order by date_received desc");
+    db.prepare("get_users_mails","select from_address,to_address,body,date_received,id from mails where username=$1 order by date_received asc");
 }
 
 crow::response web_api_server::get_users_mails(const std::string& user)
