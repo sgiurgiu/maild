@@ -1,6 +1,7 @@
 
 function retrieve_and_show_mail() {
     var username = $('#username').val();
+    $("#email_list > tbody").empty();
     $.get( '/api/mails/'+username, function( data ) {
         
         for(var i=0;i<data.length;++i)
