@@ -15,11 +15,20 @@
 #include <signal.h>
 
 using namespace maild;
-server_manager manager;
+
+struct signal_handler {
+    server_manager* manager = nullptr;
+    void stop()
+    {
+        if(manager) manager->stop();
+    }
+};
+
+signal_handler sig;
 
 void handle_signal(int /*sig*/)
 {
-  manager.stop();
+  sig.stop();
 }
 
 int main(int argc, char **argv) {
@@ -96,8 +105,9 @@ int main(int argc, char **argv) {
 
     try
     {
+        server_manager manager(options);
+        sig.manager = &manager;
         LOG4CXX_INFO(logger, "Starting MailD server...")        
-        manager.set_options(options);
         manager.run();
         LOG4CXX_INFO(logger, "Stopping MailD server...")
     }
@@ -105,13 +115,13 @@ int main(int argc, char **argv) {
     {
         std::cerr << ex.what() << std::endl;
         LOG4CXX_ERROR(logger, "Error occurred, shutting down. Cause: "<<ex.what())
-        manager.stop();
+        sig.manager = nullptr;
         return 1;
     }
     catch(...)
     {
       LOG4CXX_ERROR(logger, "Error occurred, shutting down.")
-      manager.stop();
+      sig.manager = nullptr;
       return 1;
     }
     
