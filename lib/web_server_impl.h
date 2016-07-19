@@ -3,14 +3,9 @@
 
 #include "web_options.h"
 #include "web_server.h"
+#include "crow.h"
 
-#pragma GCC diagnostic push
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include "crow_all.h"
-
-#pragma GCC diagnostic pop
 
 
 #include <log4cxx/logger.h>

@@ -1,16 +1,7 @@
 #include "web_file_server.h"
 #include "web_not_found_exception.h"
 #include "magic_handler.h"
-
-#pragma GCC diagnostic push
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include "crow_all.h"
-
-#pragma GCC diagnostic pop
-
-
+#include "crow.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
 

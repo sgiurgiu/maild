@@ -24,6 +24,8 @@ void web_server_impl::run()
     CROW_ROUTE((*app),"/api/mails/<string>")    
     .methods("GET"_method)
     ([&api_server](const std::string& username){
+        
+        
         return api_server.get_users_mails(username);
     });    
     
