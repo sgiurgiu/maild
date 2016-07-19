@@ -97,8 +97,9 @@ int main(int argc, char **argv) {
     signal (SIGTERM, handle_signal);
 
     try
-    {
+    {        
         LOG4CXX_INFO(logger, "Starting MailDWeb server...")                
+        server.set_options(options);
         server.run();
         LOG4CXX_INFO(logger, "Stopping MailDWeb server...")
     }
