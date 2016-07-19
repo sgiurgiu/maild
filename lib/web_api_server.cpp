@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <mimetic/mimetic.h>
 
 using namespace maild;
 
@@ -29,11 +30,16 @@ crow::response web_api_server::get_users_mails(const std::string& user)
     {
         const pqxx::tuple row = result[rownum];
         picojson::object mail_row;
+        std::string body_raw = row[2].as<std::string>();
         mail_row["from"] = picojson::value(row[0].c_str());
         mail_row["to"] = picojson::value(row[1].c_str());
-        mail_row["body"] = picojson::value(row[2].c_str());
+        mail_row["body_raw"] = picojson::value(body_raw.c_str());
         mail_row["date"] = picojson::value(row[3].c_str());
         mail_row["id"] = picojson::value(row[4].as<int64_t>());
+        std::stringstream body_raw_stream(body_raw);
+        mimetic::MimeEntity me(body_raw_stream);
+        
+        
         mails_array.push_back(picojson::value(mail_row));
     }    
     picojson::value val(mails_array);

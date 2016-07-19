@@ -11,6 +11,7 @@ find_library(PSQLCXX_LIBS pqxx)
 find_package(Tcmalloc)
 find_package(Threads)
 find_library(MAGIC_LIB magic)
+find_library(MIMETIC_LIB mimetic)
 
 include_directories(${Boost_INCLUDE_DIR})
 
@@ -39,7 +40,7 @@ target_link_libraries(${PROJECT_NAME}  ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
 target_link_libraries(${PROJECT_NAME}  ${PSQLCXX_LIBS})
-target_link_libraries(${PROJECT_NAME} ${MAGIC_LIB})
+target_link_libraries(${PROJECT_NAME} ${MAGIC_LIB} ${MIMETIC_LIB})
 
 if (Tcmalloc_FOUND)
     target_link_libraries(${PROJECT_NAME} ${Tcmalloc_LIBRARIES})
