@@ -16,10 +16,20 @@
 #include <signal.h>
 
 using namespace maild;
-web_server server;
+
+struct signal_handler {    
+    web_server *server = nullptr;
+    void stop()
+    {
+        if(server) server->stop();
+    }
+};
+
+signal_handler sig;
+
 void handle_signal(int /*sig*/)
 {
-    server.stop();
+  sig.stop();
 }
 
 int main(int argc, char **argv) {
@@ -99,7 +109,8 @@ int main(int argc, char **argv) {
     try
     {        
         LOG4CXX_INFO(logger, "Starting MailDWeb server...")                
-        server.set_options(options);
+        web_server server(options);
+        sig.server = &server;
         server.run();
         LOG4CXX_INFO(logger, "Stopping MailDWeb server...")
     }
@@ -107,11 +118,13 @@ int main(int argc, char **argv) {
     {
         std::cerr << ex.what() << std::endl;
         LOG4CXX_ERROR(logger, "Error occurred, shutting down. Cause: "<<ex.what())
+        sig.server = nullptr;
         return 1;
     }
     catch(...)
     {
       LOG4CXX_ERROR(logger, "Error occurred, shutting down.")
+      sig.server = nullptr;
       return 1;
     }
     
