@@ -5,6 +5,8 @@
 #include <boost/asio/io_service.hpp>
 #include <atomic>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <log4cxx/logger.h>
 
 namespace maild {
@@ -24,6 +26,8 @@ private:
     std::atomic_bool cleanup_done{false};
     bool cleanup_thread_created = false;
     std::thread cleanup_thread;
+    std::mutex mu;
+    std::condition_variable stop_condition;
     server_options options;    
     boost::asio::io_service io_service;    
     static log4cxx::LoggerPtr logger;

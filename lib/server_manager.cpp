@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <sstream>
 
-
 using namespace maild;
 using boost::asio::ip::tcp;
 
@@ -26,6 +25,7 @@ server_manager::server_manager()
 server_manager::~server_manager()
 {
     cleanup_done.store(true);
+    stop_condition.notify_all();
     if(cleanup_thread.joinable())
     {
         cleanup_thread.join();
@@ -41,8 +41,7 @@ void server_manager::start_cleanup_thread()
             pqxx::connection db(options.get_db_connection_string());
             db.prepare("delete_mail","delete from mails where date_received <= $1");
             while(!cleanup_done.load())
-            {
-                std::this_thread::sleep_for(std::chrono::seconds(options.get_check_mail_interval_seconds()));
+            {                
                 std::chrono::system_clock::time_point now = std::chrono::system_clock::now () ;
                 std::time_t obsolete_time_t = std::chrono::system_clock::to_time_t(now - std::chrono::seconds(options.get_keep_mail_seconds()));
                 std::tm tm = *std::localtime(&obsolete_time_t);
@@ -57,6 +56,8 @@ void server_manager::start_cleanup_thread()
                 {
                     LOG4CXX_INFO(logger, "Deleted "<<result.affected_rows()<<" mails older than "<<time_str.str());
                 }
+                std::unique_lock<std::mutex> lock(mu);
+                stop_condition.wait_for(lock,std::chrono::seconds(options.get_check_mail_interval_seconds()));                
             }
         } 
         catch(const std::exception& ex)
