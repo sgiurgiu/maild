@@ -62,6 +62,10 @@ void session::handle_read_greeting_response(const boost::system::error_code& err
         LOG4CXX_ERROR(logger, "Error reading greeting "<<error.message());
         return;
     }
+    if(bytes_transferred <= 6) {
+        LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_read_greeting_response");
+        return;
+    }
     std::string line(boost::asio::buffer_cast<const char*>(response.data()),bytes_transferred-2);
     std::string hello = line.substr(0,4);    
     std::string client_name = line.substr(5); 
@@ -79,7 +83,7 @@ void session::handle_read_greeting_response(const boost::system::error_code& err
     else if(hello == "EHLO")
     {
         std::ostream request_stream(&request);    
-        request_stream << "250-smtp.example.com Hello " << client_name << "\r\n";    
+        request_stream << "250-"<< options.get_domain_name() <<" Hello " << client_name << "\r\n";    
         request_stream << "250 SIZE 1000000\r\n";    
         boost::asio::async_write(socket,request,
                                 [this](const boost::system::error_code& error, size_t bytes_transferred){
@@ -109,6 +113,11 @@ void session::handle_write_commands(const boost::system::error_code& error, std:
         LOG4CXX_ERROR(logger, "Error reading command "<<error.message());
         return;
     }
+    if(bytes_transferred <= 5) {
+        LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_write_commands");
+        return;
+    }
+    
     std::string line(boost::asio::buffer_cast<const char*>(response.data()),bytes_transferred-2);
     std::string command = line.substr(0,4);
     LOG4CXX_DEBUG(logger, "Got command "<<command);       
@@ -178,6 +187,10 @@ void session::handle_write_data_response(const boost::system::error_code& error,
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading data contents "<<error.message());
+        return;
+    }
+    if(bytes_transferred <= 6) {
+        LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_write_data_response");
         return;
     }
     
