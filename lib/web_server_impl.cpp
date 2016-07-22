@@ -2,6 +2,8 @@
 #include "web_file_server.h"
 #include "web_api_server.h"
 
+#include "crow.h"
+
 using namespace maild;
 log4cxx::LoggerPtr web_server_impl::logger(log4cxx::Logger::getLogger("web_server_impl"));
 web_server_impl::web_server_impl()
@@ -16,12 +18,12 @@ void web_server_impl::set_options(const web_options& options)
 }
 void web_server_impl::run()
 {
-    app = std::make_unique<crow::SimpleApp>();
+    crow::SimpleApp app;
     web_file_server file_server(options.get_files_dir());
     LOG4CXX_DEBUG(logger, "DB connection string "<<options.get_db_connection_string());
     web_api_server api_server(options.get_db_connection_string());
     
-    CROW_ROUTE((*app),"/api/mails/<string>")    
+    CROW_ROUTE(app,"/api/mails/<string>")    
     .methods("GET"_method)
     ([&api_server](const std::string& username){
         
@@ -29,23 +31,23 @@ void web_server_impl::run()
         return api_server.get_users_mails(username);
     });    
     
-    CROW_ROUTE((*app),"/<string>")
+    CROW_ROUTE(app,"/<string>")
     .methods("GET"_method)
     ([&file_server](const std::string& path){
         return file_server.get_file_contents(path);
     });
-    CROW_ROUTE((*app),"/js/<string>")
+    CROW_ROUTE(app,"/js/<string>")
     .methods("GET"_method)
     ([&file_server](const std::string& path){
         return file_server.get_file_contents("js/"+path);
     });
-    CROW_ROUTE((*app),"/css/<string>")
+    CROW_ROUTE(app,"/css/<string>")
     .methods("GET"_method)
     ([&file_server](const std::string& path){
         return file_server.get_file_contents("css/"+path);
     });
     
-    CROW_ROUTE((*app),"/")
+    CROW_ROUTE(app,"/")
     .methods("GET"_method)
     ([&file_server]() {
         return file_server.get_file_contents("index.html");
@@ -54,15 +56,11 @@ void web_server_impl::run()
     for(const auto& ip : options.get_ips())
     {
         LOG4CXX_INFO(logger, "Binding to ip "<<ip);
-        app->bindaddr(ip);
+        app.bindaddr(ip);
     }
-    app->port(options.get_port());
+    app.port(options.get_port());
     LOG4CXX_INFO(logger, "Listening on port "<<options.get_port());
     
-    app->multithreaded().run();
-}
-void web_server_impl::stop()
-{
+    app.multithreaded().run();
     LOG4CXX_INFO(logger, "Received stop command.");
-    app.release();
 }

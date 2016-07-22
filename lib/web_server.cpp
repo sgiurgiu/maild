@@ -23,7 +23,3 @@ void web_server::run()
 {        
     impl->run();
 }
-void web_server::stop()
-{
-    impl->stop();
-}

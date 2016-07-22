@@ -12,25 +12,8 @@
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/logger.h>
 
-#include <unistd.h>
-#include <signal.h>
-
 using namespace maild;
 
-struct signal_handler {    
-    web_server *server = nullptr;
-    void stop()
-    {
-        if(server) server->stop();
-    }
-};
-
-signal_handler sig;
-
-void handle_signal(int /*sig*/)
-{
-  sig.stop();
-}
 
 int main(int argc, char **argv) {
     options_parser parser;
@@ -101,16 +84,10 @@ int main(int argc, char **argv) {
         }
     }
 
-    signal (SIGQUIT, handle_signal);
-    signal (SIGABRT, handle_signal);
-    signal (SIGINT, handle_signal);
-    signal (SIGTERM, handle_signal);
-
     try
     {        
         LOG4CXX_INFO(logger, "Starting MailDWeb server...")                
         web_server server(options);
-        sig.server = &server;
         server.run();
         LOG4CXX_INFO(logger, "Stopping MailDWeb server...")
     }
@@ -118,13 +95,11 @@ int main(int argc, char **argv) {
     {
         std::cerr << ex.what() << std::endl;
         LOG4CXX_ERROR(logger, "Error occurred, shutting down. Cause: "<<ex.what())
-        sig.server = nullptr;
         return 1;
     }
     catch(...)
     {
       LOG4CXX_ERROR(logger, "Error occurred, shutting down.")
-      sig.server = nullptr;
       return 1;
     }
     
