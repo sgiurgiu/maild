@@ -3,6 +3,7 @@
 
 #include "server_options.h"
 #include <boost/asio/io_service.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <atomic>
 #include <thread>
 #include <mutex>
@@ -29,7 +30,8 @@ private:
     std::mutex mu;
     std::condition_variable stop_condition;
     server_options options;    
-    boost::asio::io_service io_service;    
+    boost::asio::io_service io_service;  
+    boost::asio::signal_set signals;
     static log4cxx::LoggerPtr logger;
 };
 

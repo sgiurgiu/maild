@@ -15,13 +15,11 @@ using boost::asio::ip::tcp;
 
 log4cxx::LoggerPtr server_manager::logger(log4cxx::Logger::getLogger("server_manager"));
 
-server_manager::server_manager(const server_options& options):options(options)
-{
+server_manager::server_manager(const server_options& options):options(options),signals(io_service, SIGINT, SIGTERM)
+{    
     start_cleanup_thread();
 }
-server_manager::server_manager()
-{
-}
+
 server_manager::~server_manager()
 {
     cleanup_done.store(true);
@@ -79,12 +77,6 @@ void server_manager::start_cleanup_thread()
     cleanup_thread_created = true;
 }
 
-void server_manager::set_options(const server_options &options)
-{
-  this->options = options;
-  start_cleanup_thread();
-}
-
 void server_manager::run()
 {
   std::vector<std::unique_ptr<smtp_server>> servers;
@@ -92,12 +84,17 @@ void server_manager::run()
   {
     servers.push_back(std::make_unique<smtp_server>(io_service,address,options))  ;
   }
+  signals.async_wait(
+    [this](const boost::system::error_code& /*error*/, int /*signal_number*/){
+        stop();
+    });
+  
   io_service.run();
 }
 
 void server_manager::stop()
 {
   LOG4CXX_INFO(logger, "Received stop command.");
-  io_service.stop();
   cleanup_done.store(true);
+  io_service.stop();  
 }
