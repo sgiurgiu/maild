@@ -8,12 +8,10 @@ class web_server_impl;
 class web_server
 {
 public:
-    web_server();
     web_server(const web_options& options);
     ~web_server();
     void set_options(const web_options& options);
     void run();
-    void stop();
 private:    
     web_server_impl* impl;
 };

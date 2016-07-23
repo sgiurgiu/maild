@@ -11,25 +11,8 @@
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/logger.h>
 
-#include <unistd.h>
-#include <signal.h>
 
 using namespace maild;
-
-struct signal_handler {
-    server_manager* manager = nullptr;
-    void stop()
-    {
-        if(manager) manager->stop();
-    }
-};
-
-signal_handler sig;
-
-void handle_signal(int /*sig*/)
-{
-  sig.stop();
-}
 
 int main(int argc, char **argv) {
     options_parser parser;
@@ -98,30 +81,22 @@ int main(int argc, char **argv) {
         }
     }
 
-    signal (SIGQUIT, handle_signal);
-    signal (SIGABRT, handle_signal);
-    signal (SIGINT, handle_signal);
-    signal (SIGTERM, handle_signal);
-
     try
     {
         server_manager manager(options);
-        sig.manager = &manager;
-        LOG4CXX_INFO(logger, "Starting MailD server...")        
+        LOG4CXX_INFO(logger, "Starting MailD server...");        
         manager.run();
-        LOG4CXX_INFO(logger, "Stopping MailD server...")
+        LOG4CXX_INFO(logger, "Stopping MailD server...");
     }
     catch(const std::exception& ex)
     {
         std::cerr << ex.what() << std::endl;
         LOG4CXX_ERROR(logger, "Error occurred, shutting down. Cause: "<<ex.what())
-        sig.manager = nullptr;
         return 1;
     }
     catch(...)
     {
       LOG4CXX_ERROR(logger, "Error occurred, shutting down.")
-      sig.manager = nullptr;
       return 1;
     }
     
