@@ -6,9 +6,7 @@
 
 using namespace maild;
 log4cxx::LoggerPtr web_server_impl::logger(log4cxx::Logger::getLogger("web_server_impl"));
-web_server_impl::web_server_impl()
-{
-}
+
 web_server_impl::web_server_impl(const web_options& options):options(options)
 {
 }

@@ -11,10 +11,9 @@ namespace maild {
 class web_server_impl
 {
 friend class web_server;   
-private:
-    web_server_impl();
-    ~web_server_impl() = default;
+private:    
     web_server_impl(const web_options& options);
+    ~web_server_impl() = default;
     void set_options(const web_options& options);
     void run();
 private:

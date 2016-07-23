@@ -84,9 +84,9 @@ int main(int argc, char **argv) {
     try
     {
         server_manager manager(options);
-        LOG4CXX_INFO(logger, "Starting MailD server...")        
+        LOG4CXX_INFO(logger, "Starting MailD server...");        
         manager.run();
-        LOG4CXX_INFO(logger, "Stopping MailD server...")
+        LOG4CXX_INFO(logger, "Stopping MailD server...");
     }
     catch(const std::exception& ex)
     {
