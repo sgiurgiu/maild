@@ -37,7 +37,8 @@ crow::response web_file_server::get_file_contents(const std::string& file)
 boost::filesystem::path web_file_server::get_file(const std::string& file)
 {
     boost::filesystem::path base_dir(path);
-    boost::filesystem::path file_to_read = base_dir / file;    
+    boost::filesystem::path file_(file); 
+    boost::filesystem::path file_to_read = base_dir / file;        
     LOG4CXX_INFO(logger, "serving file: "<<file_to_read.string());
     boost::filesystem::file_status status = boost::filesystem::status(file_to_read);
     if(status.type() != boost::filesystem::regular_file)

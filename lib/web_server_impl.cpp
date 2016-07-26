@@ -21,20 +21,25 @@ void web_server_impl::run()
     LOG4CXX_DEBUG(logger, "DB connection string "<<options.get_db_connection_string());
     web_api_server api_server(options.get_db_connection_string());
     
+    CROW_ROUTE(app,"/api/mails/<int>")    
+    .methods("GET"_method)
+    ([&api_server](int id){
+        return api_server.get_mail(id);
+    });    
     CROW_ROUTE(app,"/api/mails/<string>")    
     .methods("GET"_method)
     ([&api_server](const std::string& username){
-        
-        
         return api_server.get_users_mails(username);
     });    
     
-    CROW_ROUTE(app,"/<string>")
+     
+    CROW_ROUTE(app,"/<path>")
     .methods("GET"_method)
     ([&file_server](const std::string& path){
         return file_server.get_file_contents(path);
-    });
-    CROW_ROUTE(app,"/js/<string>")
+    });    
+    
+    /*CROW_ROUTE(app,"/js/<string>")
     .methods("GET"_method)
     ([&file_server](const std::string& path){
         return file_server.get_file_contents("js/"+path);
@@ -44,6 +49,11 @@ void web_server_impl::run()
     ([&file_server](const std::string& path){
         return file_server.get_file_contents("css/"+path);
     });
+    CROW_ROUTE(app,"/img/<string>")
+    .methods("GET"_method)
+    ([&file_server](const std::string& path){
+        return file_server.get_file_contents("img/"+path);
+    });*/
     
     CROW_ROUTE(app,"/")
     .methods("GET"_method)

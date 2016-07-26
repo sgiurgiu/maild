@@ -37,22 +37,19 @@ void server_manager::start_cleanup_thread()
         try
         {
             pqxx::connection db(options.get_db_connection_string());
-            db.prepare("delete_mail","delete from mails where date_received <= $1");
+            std::string sql = "delete from mails where date_received <= NOW() - interval '";
+            sql+= std::to_string(options.get_keep_mail_seconds());
+            sql+=" seconds'";
+            LOG4CXX_DEBUG(logger, "Deletion sql "<<sql);
+            db.prepare("delete_mail",sql);
             while(!cleanup_done.load())
             {                
-                std::chrono::system_clock::time_point now = std::chrono::system_clock::now () ;
-                std::time_t obsolete_time_t = std::chrono::system_clock::to_time_t(now - std::chrono::seconds(options.get_keep_mail_seconds()));
-                std::tm tm = *std::localtime(&obsolete_time_t);
-                std::stringstream time_str;
-                time_str<<std::put_time(&tm, "%F %T %z");
                 pqxx::work w(db);
-                pqxx::result result = w.prepared("delete_mail")
-                    (time_str.str())
-                    .exec();
+                pqxx::result result = w.prepared("delete_mail").exec();
                 w.commit();
-                if(!cleanup_done.load())
+                if(!cleanup_done.load() && result.affected_rows() > 0)
                 {
-                    LOG4CXX_INFO(logger, "Deleted "<<result.affected_rows()<<" mails older than "<<time_str.str());
+                    LOG4CXX_INFO(logger, "Deleted "<<result.affected_rows()<<" mails");
                 }
                 std::unique_lock<std::mutex> lock(mu);
                 stop_condition.wait_for(lock,std::chrono::seconds(options.get_check_mail_interval_seconds()));                

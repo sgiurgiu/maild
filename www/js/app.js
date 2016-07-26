@@ -2,39 +2,54 @@
 function retrieve_and_show_mail() {
     var username = $('#username').val();
     $("#email_list > tbody").empty();
-    $.get( '/api/mails/'+username, function( data ) {
-        
+    $.get( '/api/mails/'+username, function( data ) {        
         for(var i=0;i<data.length;++i)
         {
-            var body = data[i]['body'];
             var from = data[i]['from'];
-            var id = data[i]['id'];
-            var lines = body.split("\r\n");
-            var subject = '';
-            for(var j=0;j<lines.length;++j)
-            {
-                var line = lines[j];
-                if(line.startsWith('Subject:'))
-                {
-                    subject = line.substring('Subject:'.length);
-                    break;
-                }
-            }
+            var id = data[i]['id'];            
+            var subject = data[i]['subject'];;
             
             var date_received = data[i]['date'];
             var mom_date = moment.utc(date_received, "YYYY-MM-DD HH:mm:ss.SSS");
             var local_date = mom_date.local().format('dddd, MMMM Do YYYY, HH:mm:ss');
-            var escaped_body = $('<div/>').text(body).html();
             $('#email_list > tbody:last-child').append('<tr class="selectable" onclick="showEmailContents('+id+')"> <td>'+from+'</td><td>'+subject+'</td> <td>'+local_date+'</td></tr>');
-            $('#email_list > tbody:last-child').append('<tr style="display: none" id="email_body_'+id+'" > <td colspan="3"><pre>'+escaped_body+'</pre></td></tr>');
+            $('#email_list > tbody:last-child').append('<tr style="display: none" id="email_body_'+id+'" > <td colspan="3" id="email_body_td_'+id+'">  <img src="/img/loading_spinner.gif"> </td></tr>');
         }
         
         $('#collapse_email_list').collapse('show');    
     });        
 }
 
-function showEmailContents(id) {
+function showEmailContents(id) {    
     $('#email_body_'+id).toggle();    
+    $.get( '/api/mails/'+id, function( data ) {
+        $('email_body_td_'+id).html("");
+        var body_raw = data["body_raw"];
+        var body_html = data["body_html"];
+        var body_plain = data["body_plain"];
+        var escaped_body_plain = $('<div/>').text(body_plain).html();
+        var escaped_body_raw = $('<div/>').text(body_raw).html();
+        //<pre>'+escaped_body+'</pre>
+        
+        var html_tabs = '<div>';
+
+        <!-- Nav tabs -->
+        html_tabs += '<ul class="nav nav-tabs" role="tablist">';
+        html_tabs += '<li role="presentation" class="active"><a href="#html_part'+id+'" aria-controls="html_part'+id+'" role="tab" data-toggle="tab">HTML</a></li>';
+        html_tabs += '<li role="presentation"><a href="#text_part'+id+'" aria-controls="text_part'+id+'" role="tab" data-toggle="tab">Text</a></li>';
+        html_tabs += '<li role="presentation"><a href="#raw_part'+id+'" aria-controls="raw_part'+id+'" role="tab" data-toggle="tab">Raw</a></li>';        
+        html_tabs += '</ul>';
+
+        
+        html_tabs += '<div class="tab-content">';
+        html_tabs += '    <div role="tabpanel" class="tab-pane active" id="html_part'+id+'"><iframe id="iframe_html_'+id+'"></iframe></div>';
+        html_tabs += '    <div role="tabpanel" class="tab-pane" id="text_part'+id+'"><pre>'+escaped_body_plain+'</pre></div>';
+        html_tabs += '    <div role="tabpanel" class="tab-pane" id="raw_part'+id+'"><pre>'+escaped_body_raw+'</pre></div>';        
+        html_tabs += '</div>';
+        html_tabs += '</div>';
+        $('#iframe_html_'+id).contents().find('html').html(body_html);
+        $('#email_body_td_'+id).append(html_tabs);
+    });
 }
 
 
