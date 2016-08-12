@@ -23,32 +23,45 @@ function retrieve_and_show_mail() {
 function showEmailContents(id) {    
     $('#email_body_'+id).toggle();    
     $.get( '/api/mails/'+id, function( data ) {
-        $('email_body_td_'+id).html("");
         var body_raw = data["body_raw"];
         var body_html = data["body_html"];
         var body_plain = data["body_plain"];
         var escaped_body_plain = $('<div/>').text(body_plain).html();
         var escaped_body_raw = $('<div/>').text(body_raw).html();
-        //<pre>'+escaped_body+'</pre>
-        
-        var html_tabs = '<div>';
+        var have_html = (body_html!==null && body_html.length>0);
+        var have_text = (body_plain!==null && body_plain.length>0);
 
-        <!-- Nav tabs -->
+        var html_tabs = '<div>';
         html_tabs += '<ul class="nav nav-tabs" role="tablist">';
-        html_tabs += '<li role="presentation" class="active"><a href="#html_part'+id+'" aria-controls="html_part'+id+'" role="tab" data-toggle="tab">HTML</a></li>';
-        html_tabs += '<li role="presentation"><a href="#text_part'+id+'" aria-controls="text_part'+id+'" role="tab" data-toggle="tab">Text</a></li>';
+        if(have_html) {
+            html_tabs += '<li role="presentation"><a href="#html_part'+id+'" aria-controls="html_part'+id+'" role="tab" data-toggle="tab">Html</a></li>';
+        }
+        if(have_text) {
+            html_tabs += '<li role="presentation"><a href="#text_part'+id+'" aria-controls="text_part'+id+'" role="tab" data-toggle="tab">Text</a></li>';
+        }
         html_tabs += '<li role="presentation"><a href="#raw_part'+id+'" aria-controls="raw_part'+id+'" role="tab" data-toggle="tab">Raw</a></li>';        
         html_tabs += '</ul>';
-
-        
         html_tabs += '<div class="tab-content">';
-        html_tabs += '    <div role="tabpanel" class="tab-pane active" id="html_part'+id+'"><iframe id="iframe_html_'+id+'"></iframe></div>';
-        html_tabs += '    <div role="tabpanel" class="tab-pane" id="text_part'+id+'"><pre>'+escaped_body_plain+'</pre></div>';
+        if(have_html) {
+            html_tabs += '    <div role="tabpanel" class="tab-pane" id="html_part'+id+'"><iframe id="iframe_html_'+id+'"></iframe></div>';
+        }
+        if(have_text) {
+            html_tabs += '    <div role="tabpanel" class="tab-pane" id="text_part'+id+'"><pre>'+escaped_body_plain+'</pre></div>';
+        }
         html_tabs += '    <div role="tabpanel" class="tab-pane" id="raw_part'+id+'"><pre>'+escaped_body_raw+'</pre></div>';        
         html_tabs += '</div>';
-        html_tabs += '</div>';
-        $('#iframe_html_'+id).contents().find('html').html(body_html);
-        $('#email_body_td_'+id).append(html_tabs);
+        html_tabs += '</div>';        
+        
+        $('#email_body_td_'+id).html(html_tabs);        
+        if(have_html) {
+            $('#iframe_html_'+id).contents().html(body_html);
+            $('.nav-tabs a[href="#html_part'+id+'"').tab('show');                    
+        } else if(have_text){
+            $('.nav-tabs a[href="#text_part'+id+'"').tab('show');        
+        } else {
+            $('.nav-tabs a[href="#raw_part'+id+'"').tab('show');        
+        }
+        
     });
 }
 
