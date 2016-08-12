@@ -86,6 +86,7 @@ crow::response web_api_server::get_mail(int id)
 }
 std::string web_api_server::get_part(mimetic::MimeEntity* me, const std::vector<std::string>& types)
 {
+    std::string xx = me->header().contentType().str();
     std::string subtype = me->header().contentType().subtype();
     for(const auto& type : types)
     {
