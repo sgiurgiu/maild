@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 project(maild)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -pedantic -Wextra")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -pedantic -Wextra -fPIC")
 
 SET(MAILD_VERSION_MAJOR "0")
 SET(MAILD_VERSION_MINOR "0")
