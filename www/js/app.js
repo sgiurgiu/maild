@@ -43,7 +43,7 @@ function showEmailContents(id) {
         html_tabs += '</ul>';
         html_tabs += '<div class="tab-content">';
         if(have_html) {
-            html_tabs += '    <div role="tabpanel" class="tab-pane" id="html_part'+id+'"><iframe id="iframe_html_'+id+'"></iframe></div>';
+            html_tabs += '    <div role="tabpanel" class="tab-pane" id="html_part'+id+'">'+body_html+'</div>';
         }
         if(have_text) {
             html_tabs += '    <div role="tabpanel" class="tab-pane" id="text_part'+id+'"><pre>'+escaped_body_plain+'</pre></div>';
@@ -54,7 +54,6 @@ function showEmailContents(id) {
         
         $('#email_body_td_'+id).html(html_tabs);        
         if(have_html) {
-            $('#iframe_html_'+id).contents().html(body_html);
             $('.nav-tabs a[href="#html_part'+id+'"').tab('show');                    
         } else if(have_text){
             $('.nav-tabs a[href="#text_part'+id+'"').tab('show');        

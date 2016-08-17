@@ -4,14 +4,18 @@
 #define PICOJSON_USE_INT64
 #include "picojson.h"
 #include "crow.h"
+#include "utils.h"
 #include <chrono>
 #include <iomanip>
 #include <sstream>
-#include <mimetic/mimetic.h>
+
 
 using namespace maild;
 log4cxx::LoggerPtr web_api_server::logger(log4cxx::Logger::getLogger("web_api_server"));
 
+web_api_server::web_api_server()
+{
+}
 web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_string)
 {
     db.prepare("get_users_mails","select from_address,to_address,body,date_received,id from mails where username=$1 order by date_received desc");
@@ -37,10 +41,8 @@ crow::response web_api_server::get_users_mails(const std::string& user)
         mail_row["to"] = picojson::value(row[1].c_str());        
         mail_row["date"] = picojson::value(row[3].c_str());
         mail_row["id"] = picojson::value(row[4].as<int64_t>());
-        std::stringstream body_raw_stream(body_raw);
-        std::ios::sync_with_stdio(false);
-        mimetic::MimeEntity me(body_raw_stream);
-        mail_row["subject"] = picojson::value(me.header().subject());
+        std::stringstream body_raw_stream(body_raw);        
+        mail_row["subject"] = picojson::value(utils::get_subject(body_raw_stream));
         mails_array.push_back(picojson::value(mail_row));
     }    
     picojson::value val(mails_array);
@@ -65,10 +67,13 @@ crow::response web_api_server::get_mail(int id)
         picojson::object mail_row;
         mail_row["body_raw"]= picojson::value(body_raw);
         std::ios::sync_with_stdio(false);
+        
         std::stringstream body_raw_stream(body_raw);
-        mimetic::MimeEntity me(body_raw_stream);
-        mail_row["body_html"]= picojson::value(get_part(&me,{"html"}));
-        mail_row["body_plain"]= picojson::value(get_part(&me,{"text","plain"}));
+        mail_row["body_html"]= picojson::value(utils::get_part(body_raw_stream,{"html"}));
+        body_raw_stream.str("");
+        body_raw_stream.clear();
+        body_raw_stream.str(body_raw);
+        mail_row["body_plain"]= picojson::value(utils::get_part(body_raw_stream,{"text","plain"}));
         
         picojson::value val(mail_row);
         std::string contents = val.serialize(false);
@@ -84,28 +89,5 @@ crow::response web_api_server::get_mail(int id)
     }
     return rsp;
 }
-std::string web_api_server::get_part(mimetic::MimeEntity* me, const std::vector<std::string>& types)
-{
-    std::string xx = me->header().contentType().str();
-    std::string subtype = me->header().contentType().subtype();
-    for(const auto& type : types)
-    {
-        if(subtype == type) 
-        {
-            const auto& body = me->body();
-            
-            std::stringstream s;
-            s << body;
-            return s.str();            
-        }
-    }    
-    
-    mimetic::MimeEntityList& parts = me->body().parts();
-    mimetic::MimeEntityList::iterator mbit = parts.begin(), meit = parts.end();
-    for(; mbit != meit; ++mbit)
-    {
-	return get_part(*mbit,types);
-    }
-    return "";
-}
+
 
