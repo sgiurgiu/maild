@@ -17,7 +17,7 @@ class session
 {
 public:
     typedef std::function<void(session*)> complete_message_handler;
-    session(boost::asio::io_service& io_service,const server_options& options,complete_message_handler message_handler);
+    session(boost::asio::io_service& io_service,const server_options& options,complete_message_handler quit_handler);
     ~session() ;//= default;
     session ( const session& ) = delete;
     session ( const session&& ) = delete;
@@ -43,7 +43,7 @@ private:
     boost::asio::ip::tcp::socket socket;
     boost::asio::streambuf response;
     boost::asio::streambuf request; 
-    complete_message_handler message_handler;
+    complete_message_handler quit_handler;
     mail mail_message;
     static log4cxx::LoggerPtr logger;
 };

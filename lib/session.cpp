@@ -11,8 +11,8 @@ using namespace maild;
 log4cxx::LoggerPtr session::logger(log4cxx::Logger::getLogger("session"));
 
 session::session(boost::asio::io_service& io_service, 
-                 const server_options& options, complete_message_handler message_handler)
-                : options(options), socket(io_service),message_handler(message_handler)
+                 const server_options& options, complete_message_handler quit_handler)
+                : options(options), socket(io_service),quit_handler(quit_handler)
 {
 }
 session::~session()
@@ -47,6 +47,7 @@ void session::handle_write_greeting(const boost::system::error_code& error, size
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error writing greeting "<<error.message());
+        quit_handler(this);
         return;
     }
     request.consume(bytes_transferred);
@@ -60,10 +61,12 @@ void session::handle_read_greeting_response(const boost::system::error_code& err
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading greeting "<<error.message());
+        quit_handler(this);
         return;
     }
     if(bytes_transferred <= 6) {
         LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_read_greeting_response");
+        quit_handler(this);
         return;
     }
     std::string line(boost::asio::buffer_cast<const char*>(response.data()),bytes_transferred-2);
@@ -97,6 +100,7 @@ void session::handle_read_commands(const boost::system::error_code& error, std::
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading command "<<error.message());
+        quit_handler(this);
         return;
     }
 
@@ -111,10 +115,12 @@ void session::handle_write_commands(const boost::system::error_code& error, std:
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading command "<<error.message());
+        quit_handler(this);
         return;
     }
     if(bytes_transferred <= 5) {
         LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_write_commands");
+        quit_handler(this);
         return;
     }
     
@@ -159,6 +165,7 @@ void session::handle_write_data_command(const boost::system::error_code& error, 
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading data command "<<error.message());
+        quit_handler(this);
         return;
     }
     response.consume(bytes_transferred);
@@ -174,6 +181,7 @@ void session::handle_read_data_command(const boost::system::error_code& error, s
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading data command "<<error.message());
+        quit_handler(this);
         return;
     }
     request.consume(bytes_transferred);
@@ -187,10 +195,12 @@ void session::handle_write_data_response(const boost::system::error_code& error,
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading data contents "<<error.message());
+        quit_handler(this);
         return;
     }
     if(bytes_transferred <= 6) {
         LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_write_data_response");
+        quit_handler(this);
         return;
     }
     
@@ -220,7 +230,7 @@ void session::handle_write_quit_command(const boost::system::error_code& error, 
     boost::asio::async_write(socket,request,
                              [this](const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/){
         //done
-        message_handler(this);
+        quit_handler(this);
     });
 
 }

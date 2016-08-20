@@ -73,7 +73,9 @@ void smtp_server::remove_session(session* s)
 
 void smtp_server::save_message(const mail &mail_message)
 {
-  if(mail_message.from.empty() || mail_message.to.empty() || mail_message.body.empty()) return;
+  if(mail_message.from.empty() || mail_message.to.empty() || mail_message.body.empty()) {
+      return;
+  }
   
   std::string username = mail_message.to.substr(0,mail_message.to.find('@'));
   pqxx::work w(db);
