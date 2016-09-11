@@ -1,7 +1,7 @@
 #include "web_file_server.h"
 #include "web_not_found_exception.h"
 #include "magic_handler.h"
-#include "crow.h"
+#include "crow_all.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
 

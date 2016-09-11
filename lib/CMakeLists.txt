@@ -27,7 +27,6 @@ set(LIBMAILD_SRCS
         active_object.cpp
         web_options.cpp
         web_server.cpp
-        web_server_impl.cpp
         web_file_server.cpp
         web_not_found_exception.cpp
         magic_handler.cpp

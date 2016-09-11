@@ -3,7 +3,7 @@
 
 #define PICOJSON_USE_INT64
 #include "picojson.h"
-#include "crow.h"
+#include "crow_all.h"
 #include "utils.h"
 #include <chrono>
 #include <iomanip>
@@ -23,8 +23,7 @@ web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_str
 }
 
 crow::response web_api_server::get_users_mails(const std::string& user)
-{
-    crow::response rsp;
+{    
     pqxx::work w(db);
     pqxx::result result = w.prepared("get_users_mails")
       (user)
@@ -47,6 +46,7 @@ crow::response web_api_server::get_users_mails(const std::string& user)
     }    
     picojson::value val(mails_array);
     std::string contents = val.serialize(false);
+    crow::response rsp;
     rsp.code = 200;
     rsp.set_header("Content-Length",std::to_string(contents.length()));        
     rsp.set_header("Content-Type","application/json; charset=UTF-8");    
@@ -54,13 +54,12 @@ crow::response web_api_server::get_users_mails(const std::string& user)
     return rsp;
 }
 crow::response web_api_server::get_mail(int id)
-{
-    crow::response rsp;
+{    
     pqxx::work w(db);
     pqxx::result result = w.prepared("get_mail")
       (id)
       .exec();      
-    w.commit();
+    w.commit();    
     if(result.size() == 1)
     {
         std::string body_raw = result[0][0].as<std::string>();
@@ -77,17 +76,20 @@ crow::response web_api_server::get_mail(int id)
         
         picojson::value val(mail_row);
         std::string contents = val.serialize(false);
+        crow::response rsp;
         rsp.code = 200;
         rsp.set_header("Content-Length",std::to_string(contents.length()));        
         rsp.set_header("Content-Type","application/json; charset=UTF-8");    
         rsp.write(contents);
+        return rsp;
     }
     else
     {
+        crow::response rsp;
         rsp.code = 404;
         rsp.write("Not found");
+        return rsp;
     }
-    return rsp;
 }
 
 
