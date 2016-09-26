@@ -87,12 +87,15 @@ void session::handle_read_greeting_response(const boost::system::error_code& err
     {
         std::ostream request_stream(&request);    
         request_stream << "250-"<< options.get_domain_name() <<" Hello " << client_name << "\r\n";    
+        request_stream << "250-AUTH LOGIN\r\n";
         request_stream << "250 SIZE 1000000\r\n";    
         boost::asio::async_write(socket,request,
                                 [this](const boost::system::error_code& error, size_t bytes_transferred){
             handle_read_commands(error,bytes_transferred);
         });                
-    }    
+    } else {
+        quit_handler(this);
+    }
 }
 
 void session::handle_read_commands(const boost::system::error_code& error, std::size_t bytes_transferred)
@@ -149,6 +152,11 @@ void session::handle_write_commands(const boost::system::error_code& error, std:
             else if(command == "RCPT")
             {
                 mail_message.to = utils::get_mail_to(command_param);
+            } 
+            else if(command == "AUTH")
+            {
+                handle_auth_command(command_param);
+                return;
             }
         }
         std::ostream request_stream(&request);    
@@ -159,6 +167,45 @@ void session::handle_write_commands(const boost::system::error_code& error, std:
         });
     }
 }
+
+void session::handle_auth_command(const std::string& command_param)
+{
+    if(command_param == "LOGIN")
+    {
+        std::ostream request_stream(&request);    
+        request_stream << "334 VXNlcm5hbWU6\r\n";    
+        boost::asio::async_write(socket,request,
+                                [this](const boost::system::error_code& /*error*/, size_t bytes_transferred){
+            request.consume(bytes_transferred);
+            
+            boost::asio::async_read_until(socket,response,"\r\n",
+                                        [this](const boost::system::error_code& /*error*/, std::size_t /*bytes_transferred*/){
+                    
+                    std::ostream request_stream(&request);    
+                    request_stream << "334 UGFzc3dvcmQ6\r\n";    
+                    boost::asio::async_write(socket,request,
+                                            [this](const boost::system::error_code& /*error*/, size_t bytes_transferred){
+                        request.consume(bytes_transferred);
+                        boost::asio::async_read_until(socket,response,"\r\n",
+                                                    [this](const boost::system::error_code& /*error*/, std::size_t /*bytes_transferred*/){
+                                
+                                std::ostream request_stream(&request);    
+                                request_stream << "235 2.7.0 Authentication successful\r\n";    
+                                boost::asio::async_write(socket,request,
+                                                        [this](const boost::system::error_code& error, size_t bytes_transferred){
+                                        handle_read_commands(error,bytes_transferred);
+                                });
+                            });            
+                    });
+                });                
+        });        
+    }
+    else
+    {
+        quit_handler(this);
+    }
+}
+
 
 void session::handle_write_data_command(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
@@ -198,7 +245,8 @@ void session::handle_write_data_response(const boost::system::error_code& error,
         quit_handler(this);
         return;
     }
-    if(bytes_transferred <= 6) {
+    if(bytes_transferred <= 6) 
+    {
         LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_write_data_response");
         quit_handler(this);
         return;
@@ -222,6 +270,7 @@ void session::handle_write_quit_command(const boost::system::error_code& error, 
     if(error)
     {
         LOG4CXX_ERROR(logger, "Error reading quit command "<<error.message());
+        quit_handler(this);
         return;
     }
     response.consume(bytes_transferred);

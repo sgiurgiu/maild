@@ -38,6 +38,7 @@ private:
     void handle_read_data_command(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_write_data_response(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_write_quit_command(const boost::system::error_code& error, std::size_t bytes_transferred);
+    void handle_auth_command(const std::string& command_param);
 private:
     server_options options;  
     boost::asio::ip::tcp::socket socket;
