@@ -87,7 +87,7 @@ void session::handle_read_greeting_response(const boost::system::error_code& err
     {
         std::ostream request_stream(&request);    
         request_stream << "250-"<< options.get_domain_name() <<" Hello " << client_name << "\r\n";    
-       // request_stream << "250-AUTH LOGIN\r\n";
+        request_stream << "250-AUTH LOGIN\r\n";
         request_stream << "250 SIZE 1000000\r\n";    
         boost::asio::async_write(socket,request,
                                 [this](const boost::system::error_code& error, size_t bytes_transferred){
@@ -157,8 +157,8 @@ void session::handle_write_commands(const boost::system::error_code& error, std:
             } 
             else if(command == "AUTH")
             {
-                //handle_auth_command(command_param);
-                //return;
+                handle_auth_command(command_param);
+                return;
             }
         }
         std::ostream request_stream(&request);    
