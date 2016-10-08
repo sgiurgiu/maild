@@ -12,8 +12,8 @@ log4cxx::LoggerPtr session::logger(log4cxx::Logger::getLogger("session"));
 
 session::session(boost::asio::io_service& io_service, 
                  const server_options& options, complete_message_handler quit_handler)
-                : options(options), socket(io_service),quit_handler(quit_handler)
-{
+                : options(options), socket(io_service),quit_handler(quit_handler),session_start(std::chrono::steady_clock::now())
+{        
 }
 session::~session()
 {
@@ -87,13 +87,15 @@ void session::handle_read_greeting_response(const boost::system::error_code& err
     {
         std::ostream request_stream(&request);    
         request_stream << "250-"<< options.get_domain_name() <<" Hello " << client_name << "\r\n";    
-        request_stream << "250-AUTH LOGIN\r\n";
+       // request_stream << "250-AUTH LOGIN\r\n";
         request_stream << "250 SIZE 1000000\r\n";    
         boost::asio::async_write(socket,request,
                                 [this](const boost::system::error_code& error, size_t bytes_transferred){
             handle_read_commands(error,bytes_transferred);
         });                
-    } else {
+    } 
+    else 
+    {
         quit_handler(this);
     }
 }
@@ -155,8 +157,8 @@ void session::handle_write_commands(const boost::system::error_code& error, std:
             } 
             else if(command == "AUTH")
             {
-                handle_auth_command(command_param);
-                return;
+                //handle_auth_command(command_param);
+                //return;
             }
         }
         std::ostream request_stream(&request);    

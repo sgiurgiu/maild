@@ -11,6 +11,10 @@
 #include <log4cxx/logger.h>
 #include <unordered_set>
 #include <functional>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
+#include <atomic>
 #include <pqxx/connection>
 
 namespace maild {
@@ -43,6 +47,10 @@ private:
     active_object ao;
     std::unordered_set<session_ptr,std::hash<session_ptr>,session_ptr_equals<session_ptr>> sessions;
     pqxx::connection db;
+    std::thread cleanup_sessions_thread;
+    std::condition_variable cleanup_sessions_wait_condition;
+    std::atomic_bool cleanup_done{false};
+    std::mutex cleanup_mutex;
     static log4cxx::LoggerPtr logger;
 };
 }

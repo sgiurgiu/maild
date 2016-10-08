@@ -19,10 +19,53 @@ smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string&
   
   LOG4CXX_INFO(logger, "Starting to accept connections on address "<<listen_address<<" and port "<<options.get_plain_port());
   start_accept(); 
+  cleanup_sessions_thread = std::thread([this](){      
+        try
+        {            
+            while(!cleanup_done.load())
+            {                
+                std::unique_lock<std::mutex> lock(cleanup_mutex);
+                cleanup_sessions_wait_condition.wait_for(lock,std::chrono::seconds(60));                
+                
+                ao.send([this](){                    
+                    for(auto& session : sessions)
+                    {
+                        auto now = std::chrono::steady_clock::now();
+                        std::chrono::seconds  diff = std::chrono::duration_cast<std::chrono::seconds>(now - session->get_session_start_time());
+                        if(diff.count() > 60)
+                        {
+                            remove_session(session.get());
+                        }
+                    }                        
+                });                    
+            }
+        } 
+        catch(const std::exception& ex)
+        {
+            if(!cleanup_done.load())
+            {
+                LOG4CXX_ERROR(logger, "Cleanup sessions encountered an exception : "<<ex.what());
+            }            
+        }
+        catch(...)
+        {
+            if(!cleanup_done.load())
+            {
+                LOG4CXX_ERROR(logger, "Cleanup sessions encountered an unknown exception");
+            }            
+        }
+      
+  });
 }
 
 smtp_server::~smtp_server()
 {
+    cleanup_done.store(true);
+    cleanup_sessions_wait_condition.notify_all();
+    if(cleanup_sessions_thread.joinable())
+    {
+        cleanup_sessions_thread.join();
+    }    
   db.disconnect();
 }
 

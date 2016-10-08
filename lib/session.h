@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 #include <functional>
-
+#include <chrono>
 #include <log4cxx/logger.h>
 
 namespace maild {
@@ -17,17 +17,20 @@ class session
 {
 public:
     typedef std::function<void(session*)> complete_message_handler;
-    session(boost::asio::io_service& io_service,const server_options& options,complete_message_handler quit_handler);
+    session(boost::asio::io_service& io_service, const server_options& options, complete_message_handler quit_handler);
     ~session() ;//= default;
     session ( const session& ) = delete;
-    session ( const session&& ) = delete;
+    session ( session&& ) = delete;
     session& operator= ( const session& ) = delete;
-    session& operator= ( const session&& ) = delete;
+    session& operator= ( session&& ) = delete;
 
     boost::asio::ip::tcp::socket& get_socket();
     void start();
     mail get_mail_message() const;
-    
+    std::chrono::time_point<std::chrono::steady_clock> get_session_start_time() const
+    {
+        return session_start;
+    }
 private:    
     void handle_write_greeting(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_read_greeting_response(const boost::system::error_code& error,
@@ -46,6 +49,7 @@ private:
     boost::asio::streambuf request; 
     complete_message_handler quit_handler;
     mail mail_message;
+    std::chrono::time_point<std::chrono::steady_clock> session_start;
     static log4cxx::LoggerPtr logger;
 };
 

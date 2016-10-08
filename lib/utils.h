@@ -61,7 +61,7 @@ namespace maild {
             if(me->header().contentType().isMultipart())
             {
                boundary =  me->header().contentType().param("boundary");               
-            }
+            }            
             for(const auto& type : types)
             {
                 if(subtype == type) 
