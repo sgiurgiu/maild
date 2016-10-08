@@ -16,10 +16,10 @@ void web_server::run()
     LOG4CXX_DEBUG(logger, "DB connection string "<<options.get_db_connection_string());
     web_api_server api_server(options.get_db_connection_string());
     
-    CROW_ROUTE(app,"/api/mails/<int>")    
+    CROW_ROUTE(app,"/api/mails/<int>/<string>")    
     .methods("GET"_method)
-    ([&api_server](int id){
-        return api_server.get_mail(id);
+    ([&api_server](int id, const std::string& type){
+        return api_server.get_mail(id,type);
     });    
     CROW_ROUTE(app,"/api/mails/<string>")    
     .methods("GET"_method)

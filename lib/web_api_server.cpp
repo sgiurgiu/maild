@@ -24,6 +24,8 @@ web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_str
 
 crow::response web_api_server::get_users_mails(const std::string& user)
 {    
+    std::lock_guard<std::mutex> lock(mu);//this is awfullllllll. TODO: get rid of this mutex
+    
     pqxx::work w(db);
     pqxx::result result = w.prepared("get_users_mails")
       (user)
@@ -53,7 +55,7 @@ crow::response web_api_server::get_users_mails(const std::string& user)
     rsp.write(contents);
     return rsp;
 }
-crow::response web_api_server::get_mail(int id)
+crow::response web_api_server::get_mail(int id, const std::string& type)
 {    
     pqxx::work w(db);
     pqxx::result result = w.prepared("get_mail")
@@ -62,25 +64,32 @@ crow::response web_api_server::get_mail(int id)
     w.commit();    
     if(result.size() == 1)
     {
-        std::string body_raw = result[0][0].as<std::string>();
-        picojson::object mail_row;
-        mail_row["body_raw"]= picojson::value(body_raw);
-        std::ios::sync_with_stdio(false);
-        
-        std::stringstream body_raw_stream(body_raw);
-        mail_row["body_html"]= picojson::value(utils::get_part(body_raw_stream,{"html"}));
-        body_raw_stream.str("");
-        body_raw_stream.clear();
-        body_raw_stream.str(body_raw);
-        mail_row["body_plain"]= picojson::value(utils::get_part(body_raw_stream,{"text","plain"}));
-        
-        picojson::value val(mail_row);
-        std::string contents = val.serialize(false);
         crow::response rsp;
         rsp.code = 200;
-        rsp.set_header("Content-Length",std::to_string(contents.length()));        
-        rsp.set_header("Content-Type","application/json; charset=UTF-8");    
-        rsp.write(contents);
+        
+        std::string body_raw = result[0][0].as<std::string>();
+        if(type == "raw")
+        {
+            rsp.set_header("Content-Length",std::to_string(body_raw.length()));        
+            rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
+            rsp.write(body_raw);            
+        } 
+        else if (type == "html")
+        {
+            std::stringstream body_raw_stream(body_raw);
+            auto html = utils::get_part(body_raw_stream,{"html"});
+            rsp.set_header("Content-Length",std::to_string(html.length()));        
+            rsp.set_header("Content-Type","text/html; charset=UTF-8");    
+            rsp.write(html);            
+        } 
+        else if (type == "text")
+        {
+            std::stringstream body_raw_stream(body_raw);
+            auto text = utils::get_part(body_raw_stream,{"text","plain"});
+            rsp.set_header("Content-Length",std::to_string(text.length()));        
+            rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
+            rsp.write(text);            
+        }        
         return rsp;
     }
     else
