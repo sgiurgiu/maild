@@ -23,20 +23,17 @@ function retrieve_and_show_mail() {
 function showEmailContents(id) {    
     $('#email_body_'+id).toggle();    
     
-        var html_tabs = '<div>';
+        var html_tabs = '<div >';
         html_tabs += '<ul class="nav nav-tabs" role="tablist">';        
         html_tabs += '<li role="presentation"><a href="#html_part'+id+'" aria-controls="html_part'+id+'" role="tab" data-toggle="tab">Html</a></li>';
         html_tabs += '<li role="presentation"><a href="#text_part'+id+'" aria-controls="text_part'+id+'" role="tab" data-toggle="tab">Text</a></li>';
         html_tabs += '<li role="presentation"><a href="#raw_part'+id+'" aria-controls="raw_part'+id+'" role="tab" data-toggle="tab">Raw</a></li>';        
         html_tabs += '</ul>';
-        html_tabs += '<div class="tab-content">';
+        html_tabs += '<div class="tab-content" >';
         
-        html_tabs += '    <div role="tabpanel" class="tab-pane" id="html_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/html"/></div>';
-        
-        
-        html_tabs += '    <div role="tabpanel" class="tab-pane" id="text_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/text"/></div>';
-        
-        html_tabs += '    <div role="tabpanel" class="tab-pane" id="raw_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/raw"/></div>';        
+        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="html_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/html"/></div>';        
+        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="text_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/text"/></div>';        
+        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="raw_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/raw"/></div>';        
         html_tabs += '</div>';
         html_tabs += '</div>';        
         
