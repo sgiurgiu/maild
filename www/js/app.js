@@ -31,9 +31,9 @@ function showEmailContents(id) {
         html_tabs += '</ul>';
         html_tabs += '<div class="tab-content" >';
         
-        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="html_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/html"/></div>';        
-        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="text_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/text"/></div>';        
-        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="raw_part'+id+'"><iframe width="100%" height="100%" src="/api/mails/'+id+'/raw"/></div>';        
+        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="html_part'+id+'"><iframe frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mails/'+id+'/html"/></div>';        
+        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="text_part'+id+'"><iframe frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mails/'+id+'/text"/></div>';        
+        html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" id="raw_part'+id+'"><iframe frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mails/'+id+'/raw"/></div>';        
         html_tabs += '</div>';
         html_tabs += '</div>';        
         
