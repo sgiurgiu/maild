@@ -101,7 +101,19 @@ void smtp_server::handle_accept(session_ptr new_session, const boost::system::er
 void smtp_server::remove_session(session* s)
 {
   mail mail_message = s->get_mail_message();
-  save_message(mail_message);
+    try
+    {
+        save_message(mail_message);
+    } 
+    catch(const std::exception& ex)
+    {
+        LOG4CXX_ERROR(logger, "Error occurred, while saving message to database. Cause: "<<ex.what())    
+    }
+    catch(...)
+    {
+        LOG4CXX_ERROR(logger, "Unknown error occurred, while saving message to database.")
+    }
+  
   ao.send([this,s](){
         
         std::shared_ptr<session> dummy_ptr(s, [](session*){});//won't delete
