@@ -14,16 +14,18 @@ void web_server::run()
     crow::SimpleApp app;
     web_file_server file_server(options.get_files_dir());
     LOG4CXX_DEBUG(logger, "DB connection string "<<options.get_db_connection_string());
-    web_api_server api_server(options.get_db_connection_string());
+    
     
     CROW_ROUTE(app,"/api/mails/<int>/<string>")    
     .methods("GET"_method)
-    ([&api_server](int id, const std::string& type){
+    ([this](int id, const std::string& type){
+        web_api_server api_server(options.get_db_connection_string());
         return api_server.get_mail(id,type);
     });    
     CROW_ROUTE(app,"/api/mails/<string>")    
     .methods("GET"_method)
-    ([&api_server](const std::string& username){
+    ([this](const std::string& username){
+        web_api_server api_server(options.get_db_connection_string());
         return api_server.get_users_mails(username);
     });    
     

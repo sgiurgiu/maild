@@ -5,8 +5,6 @@
 #include <pqxx/connection>
 #include <log4cxx/logger.h>
 
-#include <mutex>
-
 namespace crow {
     struct response;
 }
@@ -24,7 +22,6 @@ public:
     crow::response get_mail(int id,const std::string& type);
 private:
     pqxx::connection db;
-    std::mutex mu;
     static log4cxx::LoggerPtr logger;
 
 };

@@ -11,10 +11,11 @@ include_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_INCLUDE_DIR})
 
 set(MAILD_SRCS main.cpp options.cpp options_parser.cpp)
 
-add_executable(${PROJECT_NAME}  ${MAILD_SRCS})
+set(EXECUTABLE_NAME "maild_web")
+add_executable(${EXECUTABLE_NAME}  ${MAILD_SRCS})
 
-target_link_libraries(${PROJECT_NAME}  libmaild)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
+target_link_libraries(${EXECUTABLE_NAME}  maillib)
+target_link_libraries(${EXECUTABLE_NAME} ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
 
-install(TARGETS ${PROJECT_NAME}  RUNTIME DESTINATION bin)
+install(TARGETS ${EXECUTABLE_NAME}  RUNTIME DESTINATION bin)
 

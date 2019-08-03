@@ -15,6 +15,9 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 
 add_subdirectory(lib)
 add_subdirectory(app)
@@ -31,7 +34,40 @@ SET(CPACK_PACKAGE_VERSION_MINOR ${MAILD_VERSION_MINOR})
 SET(CPACK_PACKAGE_VERSION_PATCH ${MAILD_VERSION_PATCH})
 
 
+set(CPACK_RPM_RELOCATION_PATHS "/${CMAKE_INSTALL_SYSCONFDIR}" "${CMAKE_INSTALL_BINDIR}")
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0) # don't prepend package name
+#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/postinstall")
 
+install(DIRECTORY "www/"
+  DESTINATION "/var/www/html/maild")
+
+install(FILES "conf/maild.conf.sample"
+  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild")
+
+install(FILES "conf/log.properties.sample"
+  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild")
+  
+install(FILES "conf/maild_web.conf.sample"
+  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild"
+  )
+
+install(FILES "conf/log.properties.sample"
+  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild"
+  )
+install(FILES "conf/web_log.properties.sample"
+  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild"
+  )
+
+install(FILES "service/maild.service" 
+    DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/systemd/system"  
+    )
+
+install(FILES "service/maild_web.service" 
+    DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/systemd/system"    
+    )
+    
 SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+
 
 INCLUDE(CPack)

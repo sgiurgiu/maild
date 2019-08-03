@@ -11,5 +11,5 @@ set(LIBMAILD_TEST_SRCS
 
 add_executable(${PROJECT_NAME}  ${LIBMAILD_TEST_SRCS})
 
-target_link_libraries(${PROJECT_NAME}  libmaild)
+target_link_libraries(${PROJECT_NAME}  maillib)
 target_link_libraries(${PROJECT_NAME}  ${CMAKE_THREAD_LIBS_INIT})

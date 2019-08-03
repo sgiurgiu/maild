@@ -1,0 +1,16 @@
+{
+    "database_url" : "postgresql://maild:maild@localhost/maild",
+    "domain":"xvknp.com",
+    "keep_mail":3600,
+    "check_mail_interval":60,
+    "ips":["0.0.0.0"],
+
+    "plain": {
+        "port": 25,
+        "enabled" :true
+    },
+    "secure":{
+        "port":465,
+        "enabled":true
+    }
+}

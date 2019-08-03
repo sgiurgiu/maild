@@ -32,17 +32,18 @@ set(LIBMAILD_SRCS
         magic_handler.cpp
         web_api_server.cpp)
 
-add_library(${PROJECT_NAME}  SHARED ${LIBMAILD_SRCS})
+set(LIBRARY_NAME "maillib")        
+add_library(${LIBRARY_NAME}  SHARED ${LIBMAILD_SRCS})
 
 
-target_link_libraries(${PROJECT_NAME}  ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
-target_link_libraries(${PROJECT_NAME}  ${PSQLCXX_LIBS})
-target_link_libraries(${PROJECT_NAME} ${MAGIC_LIB} ${MIMETIC_LIB})
+target_link_libraries(${LIBRARY_NAME}  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${LIBRARY_NAME} ${OPENSSL_CRYPTO_LIBRARY})
+target_link_libraries(${LIBRARY_NAME} ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
+target_link_libraries(${LIBRARY_NAME}  ${PSQLCXX_LIBS})
+target_link_libraries(${LIBRARY_NAME} ${MAGIC_LIB} ${MIMETIC_LIB})
 
 if (Tcmalloc_FOUND)
-    target_link_libraries(${PROJECT_NAME} ${Tcmalloc_LIBRARIES})
+    target_link_libraries(${LIBRARY_NAME} ${Tcmalloc_LIBRARIES})
 endif(Tcmalloc_FOUND)
 
-install(TARGETS ${PROJECT_NAME}  LIBRARY DESTINATION lib)
+install(TARGETS ${LIBRARY_NAME}  LIBRARY DESTINATION lib)

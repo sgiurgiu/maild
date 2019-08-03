@@ -121,7 +121,8 @@ void smtp_server::remove_session(session* s)
         if(it != sessions.end())
         {            
             sessions.erase(it);
-            LOG4CXX_DEBUG(logger, "Sessions count "<<sessions.size());            
+            LOG4CXX_DEBUG(logger, "Sessions count "<<sessions.size());      
+            delete it->get();
         }
     });
 }

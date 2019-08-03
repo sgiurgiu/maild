@@ -1,0 +1,3 @@
+#!/bin/sh
+
+useradd "maild" -U -M -r -s /sbin/nologin -c

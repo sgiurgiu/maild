@@ -1,0 +1,14 @@
+[Unit]
+Description=Maild Web
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/maild_web -c /etc/maild/maild_web.conf -l /etc/maild/web_log.properties
+User=maild
+Group=maild
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target default.target
+

@@ -3,8 +3,7 @@ create database maild;
 
 \c maild
 
-create table mails(ID bigserial primary key,from_address varchar(256), to_address varchar(256), body text, date_received timestamp);
-alter table mails add column username varchar(200);
+create table mails(ID bigserial primary key,from_address varchar(256), to_address varchar(256), body text, date_received timestamp, username varchar(200));
 
 GRANT INSERT ON TABLE mails to maild;
 GRANT DELETE ON TABLE mails  to maild;

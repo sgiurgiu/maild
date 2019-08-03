@@ -24,8 +24,6 @@ web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_str
 
 crow::response web_api_server::get_users_mails(const std::string& user)
 {    
-    std::lock_guard<std::mutex> lock(mu);//this is awfullllllll. TODO: get rid of this mutex
-    
     pqxx::work w(db);
     pqxx::result result = w.prepared("get_users_mails")
       (user)
@@ -58,46 +56,52 @@ crow::response web_api_server::get_users_mails(const std::string& user)
 crow::response web_api_server::get_mail(int id, const std::string& type)
 {    
     pqxx::work w(db);
-    pqxx::result result = w.prepared("get_mail")
-      (id)
-      .exec();      
-    w.commit();    
-    if(result.size() == 1)
+    try{
+        pqxx::result result = w.prepared("get_mail")
+        (id)
+        .exec();      
+        w.commit();    
+        if(result.size() == 1)
+        {
+            crow::response rsp;
+            rsp.code = 200;
+            
+            std::string body_raw = result[0][0].as<std::string>();
+            if(type == "raw")
+            {
+                rsp.set_header("Content-Length",std::to_string(body_raw.length()));        
+                rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
+                rsp.write(body_raw);            
+            } 
+            else if (type == "html")
+            {
+                std::stringstream body_raw_stream(body_raw);
+                auto html = utils::get_part(body_raw_stream,{"html"});
+                rsp.set_header("Content-Length",std::to_string(html.length()));        
+                rsp.set_header("Content-Type","text/html; charset=UTF-8");    
+                rsp.write(html);            
+            } 
+            else if (type == "text")
+            {
+                std::stringstream body_raw_stream(body_raw);
+                auto text = utils::get_part(body_raw_stream,{"text","plain"});
+                rsp.set_header("Content-Length",std::to_string(text.length()));        
+                rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
+                rsp.write(text);            
+            }        
+            return rsp;
+        }
+        else
+        {
+            crow::response rsp;
+            rsp.code = 404;
+            rsp.write("Not found");
+            return rsp;
+        }
+    }catch (const std::exception& e)
     {
-        crow::response rsp;
-        rsp.code = 200;
-        
-        std::string body_raw = result[0][0].as<std::string>();
-        if(type == "raw")
-        {
-            rsp.set_header("Content-Length",std::to_string(body_raw.length()));        
-            rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
-            rsp.write(body_raw);            
-        } 
-        else if (type == "html")
-        {
-            std::stringstream body_raw_stream(body_raw);
-            auto html = utils::get_part(body_raw_stream,{"html"});
-            rsp.set_header("Content-Length",std::to_string(html.length()));        
-            rsp.set_header("Content-Type","text/html; charset=UTF-8");    
-            rsp.write(html);            
-        } 
-        else if (type == "text")
-        {
-            std::stringstream body_raw_stream(body_raw);
-            auto text = utils::get_part(body_raw_stream,{"text","plain"});
-            rsp.set_header("Content-Length",std::to_string(text.length()));        
-            rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
-            rsp.write(text);            
-        }        
-        return rsp;
-    }
-    else
-    {
-        crow::response rsp;
-        rsp.code = 404;
-        rsp.write("Not found");
-        return rsp;
+        w.abort();
+        throw;
     }
 }
 

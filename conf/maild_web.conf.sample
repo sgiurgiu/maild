@@ -1,0 +1,11 @@
+{
+    "database_url" : "postgresql://maild:maild@localhost/maild",
+    "domain":"xvknp.com",
+    "port":80,
+    "ips":["0.0.0.0"],
+    "files_dir":"/var/www/html/maild",
+    "api_prefix":"/api"
+}
+
+
+
