@@ -1,3 +1,5 @@
 #!/bin/sh
 
-useradd "maild" -U -M -r -s /sbin/nologin -c
+useradd -U -M -r -s /sbin/nologin maild
+
+mkdir /var/log/maild && chown maild:maild /var/log/maild
