@@ -1,5 +1,11 @@
 #!/bin/sh
 
-useradd -U -M -r -s /sbin/nologin maild
+user_exists=$(id -u maild > /dev/null 2>&1; echo $?)
+if [ $user_exists -eq 1 ]; then
+    useradd -U -M -r -s /sbin/nologin maild
+fi
 
-mkdir /var/log/maild && chown maild:maild /var/log/maild
+mkdir -p /var/log/maild && chown maild:maild /var/log/maild
+
+setcap 'cap_net_bind_service=+ep' /usr/bin/maild
+
