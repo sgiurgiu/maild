@@ -72,9 +72,15 @@ smtp_server::~smtp_server()
 void smtp_server::start_accept()
 {
     LOG4CXX_INFO(logger, "Waiting for client...");
+#if BOOST_VERSION_NUMBER_PATCH(BOOST_VERSION) >= 7000
     session_ptr new_session = std::make_shared<session>(acceptor.get_executor(),options,[this](session* s){
         remove_session(s);
     });    
+#else
+    session_ptr new_session = std::make_shared<session>(acceptor.get_io_service(),options,[this](session* s){
+        remove_session(s);
+    });
+#endif
     acceptor.async_accept(new_session->get_socket(),[new_session,this](const boost::system::error_code& error){
         handle_accept(std::move(new_session),error);
     });
