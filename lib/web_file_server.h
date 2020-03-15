@@ -8,15 +8,9 @@
 #include <string>
 #include <log4cxx/logger.h>
 #include <memory>
+#include <boost/beast.hpp>
+#include <filesystem>
 
-namespace boost {
-    namespace filesystem {
-        class path;
-    }
-}
-namespace crow {
-    struct response;
-}
 namespace maild {
     
 class magic_handler;
@@ -26,10 +20,12 @@ class web_file_server
 public:
     web_file_server(const std::string& path);
     ~web_file_server();
-    crow::response get_file_contents(const std::string& file);
+    boost::beast::http::response<boost::beast::http::string_body>
+    get_file_contents(const boost::beast::http::request<boost::beast::http::string_body>& request,
+                      const std::string& file);
         
 private:
-    boost::filesystem::path get_file(const std::string& file);
+    std::filesystem::path get_file(const std::string& file);
     std::string get_mime_type(const std::string& file);
 private:
     std::string path;    

@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.2)
 project(libmaild)
 
-set(Boost_USE_STATIC_LIBS        OFF)
+set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 
-find_package(Boost 1.55 REQUIRED system filesystem)
+find_package(Boost 1.70 REQUIRED system filesystem)
 find_package(OpenSSL REQUIRED)
 find_library(LOG4CXX_LIBS log4cxx)
 find_library(PSQLCXX_LIBS pqxx)
@@ -13,7 +13,7 @@ find_package(Threads)
 find_library(MAGIC_LIB magic)
 find_library(MIMETIC_LIB mimetic)
 
-include_directories(${Boost_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR} ${BEASTHTTP_INCLUDE})
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)  
     add_definitions(-DMAILD_DEBUG)

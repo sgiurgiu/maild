@@ -3,7 +3,6 @@
 
 #define PICOJSON_USE_INT64
 #include "picojson.h"
-#include "crow_all.h"
 #include "utils.h"
 #include <chrono>
 #include <iomanip>
@@ -22,18 +21,16 @@ web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_str
     db.prepare("get_mail","select body from mails where id=$1");
 }
 
-crow::response web_api_server::get_users_mails(const std::string& user)
+web_api_server::response web_api_server::get_users_mails(const request& request, const std::string& user)
 {    
     pqxx::work w(db);
-    pqxx::result result = w.prepared("get_users_mails")
-      (user)
-      .exec();      
+    pqxx::result result = w.exec_prepared("get_users_mails",user);
     w.commit();        
     const int num_rows = result.size();
     picojson::array mails_array;    
     for (int rownum=0; rownum < num_rows; ++rownum)
     {
-        const pqxx::tuple row = result[rownum];
+        const pqxx::row row = result[rownum];
         picojson::object mail_row;
         std::string body_raw = row[2].as<std::string>();
         mail_row["from"] = picojson::value(row[0].c_str());
@@ -46,63 +43,70 @@ crow::response web_api_server::get_users_mails(const std::string& user)
     }    
     picojson::value val(mails_array);
     std::string contents = val.serialize(false);
-    crow::response rsp;
-    rsp.code = 200;
-    rsp.set_header("Content-Length",std::to_string(contents.length()));        
-    rsp.set_header("Content-Type","application/json; charset=UTF-8");    
-    rsp.write(contents);
+    response rsp;
+    rsp.result(boost::beast::http::status::ok);
+    rsp.version(request.version());
+    rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+    rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
+    rsp.set(boost::beast::http::field::content_type,"application/json; charset=UTF-8");
+    rsp.body() = (contents);
+    rsp.prepare_payload();
+    rsp.keep_alive(request.keep_alive());
     return rsp;
 }
-crow::response web_api_server::get_mail(int id, const std::string& type)
+web_api_server::response web_api_server::get_mail(const request& request,int id,const std::string& type)
 {    
     pqxx::work w(db);
+    response rsp;
     try{
-        pqxx::result result = w.prepared("get_mail")
-        (id)
-        .exec();      
-        w.commit();    
+        pqxx::result result = w.exec_prepared("get_mail",id);
+        w.commit();
         if(result.size() == 1)
         {
-            crow::response rsp;
-            rsp.code = 200;
+            rsp.result(boost::beast::http::status::ok);
+            rsp.version(request.version());
+            rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
             
             std::string body_raw = result[0][0].as<std::string>();
             if(type == "raw")
             {
-                rsp.set_header("Content-Length",std::to_string(body_raw.length()));        
-                rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
-                rsp.write(body_raw);            
+                rsp.set(boost::beast::http::field::content_length, std::to_string(body_raw.length()));
+                rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");
+                rsp.body() = (body_raw);
             } 
             else if (type == "html")
             {
                 std::stringstream body_raw_stream(body_raw);
                 auto html = utils::get_part(body_raw_stream,{"html"});
-                rsp.set_header("Content-Length",std::to_string(html.length()));        
-                rsp.set_header("Content-Type","text/html; charset=UTF-8");    
-                rsp.write(html);            
+                rsp.set(boost::beast::http::field::content_length, std::to_string(html.length()));
+                rsp.set(boost::beast::http::field::content_type,"text/html; charset=UTF-8");
+                rsp.body() = (html);
             } 
             else if (type == "text")
             {
                 std::stringstream body_raw_stream(body_raw);
                 auto text = utils::get_part(body_raw_stream,{"text","plain"});
-                rsp.set_header("Content-Length",std::to_string(text.length()));        
-                rsp.set_header("Content-Type","text/plain; charset=UTF-8");    
-                rsp.write(text);            
-            }        
-            return rsp;
+                rsp.set(boost::beast::http::field::content_length, std::to_string(text.length()));
+                rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");
+                rsp.body() = (text);
+            }
         }
         else
         {
-            crow::response rsp;
-            rsp.code = 404;
-            rsp.write("Not found");
-            return rsp;
+            rsp.result(boost::beast::http::status::not_found);
+            rsp.version(request.version());
+            rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+            rsp.body() = ("Not found");
         }
-    }catch (const std::exception& e)
+    }
+    catch (const std::exception& e)
     {
         w.abort();
         throw;
     }
+    rsp.prepare_payload();
+    rsp.keep_alive(request.keep_alive());
+    return rsp;
 }
 
 

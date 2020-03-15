@@ -1,0 +1,3 @@
+[submodule "external/beasthttp"]
+	path = external/beasthttp
+	url = https://github.com/0xdead4ead/BeastHttp.git

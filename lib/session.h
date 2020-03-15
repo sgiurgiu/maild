@@ -17,7 +17,7 @@ class session
 {
 public:
     typedef std::function<void(session*)> complete_message_handler;
-    session(boost::asio::io_service& io_service, const server_options& options, complete_message_handler quit_handler);
+    session(const boost::asio::executor& executor, const server_options& options, complete_message_handler quit_handler);
     ~session() ;//= default;
     session ( const session& ) = delete;
     session ( session&& ) = delete;

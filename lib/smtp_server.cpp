@@ -72,7 +72,7 @@ smtp_server::~smtp_server()
 void smtp_server::start_accept()
 {
     LOG4CXX_INFO(logger, "Waiting for client...");
-    session_ptr new_session = std::make_shared<session>(acceptor.get_io_service(),options,[this](session* s){
+    session_ptr new_session = std::make_shared<session>(acceptor.get_executor(),options,[this](session* s){
         remove_session(s);
     });    
     acceptor.async_accept(new_session->get_socket(),[new_session,this](const boost::system::error_code& error){
@@ -135,11 +135,7 @@ void smtp_server::save_message(const mail &mail_message)
   
   std::string username = mail_message.to.substr(0,mail_message.to.find('@'));
   pqxx::work w(db);
-  w.prepared("new_mail")
-      (mail_message.from)
-      (mail_message.to)
-      (mail_message.body)
-      (username)
-      .exec();
+  w.exec_prepared("new_mail",mail_message.from,mail_message.to,mail_message.body,
+      username);
   w.commit();
 }

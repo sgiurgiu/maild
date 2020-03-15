@@ -45,7 +45,7 @@ void server_manager::start_cleanup_thread()
             while(!cleanup_done.load())
             {                
                 pqxx::work w(db);
-                pqxx::result result = w.prepared("delete_mail").exec();
+                pqxx::result result = w.exec_prepared("delete_mail");
                 w.commit();
                 if(!cleanup_done.load() && result.affected_rows() > 0)
                 {

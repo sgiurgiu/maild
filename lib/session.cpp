@@ -10,9 +10,10 @@ using namespace maild;
 
 log4cxx::LoggerPtr session::logger(log4cxx::Logger::getLogger("session"));
 
-session::session(boost::asio::io_service& io_service, 
+session::session(const boost::asio::executor& executor,
                  const server_options& options, complete_message_handler quit_handler)
-                : options(options), socket(io_service),quit_handler(quit_handler),session_start(std::chrono::steady_clock::now())
+                : options(options), socket(executor),quit_handler(quit_handler),
+                  session_start(std::chrono::steady_clock::now())
 {        
 }
 session::~session()

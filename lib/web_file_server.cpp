@@ -1,7 +1,6 @@
 #include "web_file_server.h"
 #include "web_not_found_exception.h"
 #include "magic_handler.h"
-#include "crow_all.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
 
@@ -13,35 +12,47 @@ web_file_server::web_file_server(const std::string& path):path(path),magic(std::
 }
 web_file_server::~web_file_server() = default;
 
-crow::response web_file_server::get_file_contents(const std::string& file)
-{
-    crow::response rsp;
-    try{
+boost::beast::http::response<boost::beast::http::string_body>
+    web_file_server::get_file_contents(const boost::beast::http::request<boost::beast::http::string_body>& request,
+                                       const std::string& file)
+{    
+    boost::beast::http::response<boost::beast::http::string_body> rsp;
+    try{                
         std::string file_name = get_file(file).string();
         std::ifstream in (file_name);   
-        rsp.code = 200;
+        rsp.result(boost::beast::http::status::ok);
+        rsp.version(request.version());
+        rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
         std::string contents = (static_cast<std::stringstream const&>(std::stringstream() << in.rdbuf()).str());
-        rsp.set_header("Content-Length",std::to_string(contents.length()));        
+        rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
         std::string mime = get_mime_type(file_name);
         LOG4CXX_DEBUG(logger, "file: "<<file<<" has mime "<<mime);
-        rsp.set_header("Content-Type",mime);
-        rsp.write(contents);
-    }catch(const web_not_found_exception& ex) {
-        rsp.code = 404;
-        rsp.write(ex.what());
+        rsp.set(boost::beast::http::field::content_type,mime);
+        rsp.body() = contents;
     }
-    //rsp.end();
+    catch(const web_not_found_exception& ex)
+    {
+        rsp.result(boost::beast::http::status::not_found);
+        rsp.version(request.version());
+        rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");
+        rsp.body() = ex.what();
+    }
+    rsp.prepare_payload();
+    rsp.keep_alive(request.keep_alive());
     return rsp;
 }
 
-boost::filesystem::path web_file_server::get_file(const std::string& file)
+std::filesystem::path web_file_server::get_file(const std::string& file)
 {
-    boost::filesystem::path base_dir(path);
-    boost::filesystem::path file_(file); 
-    boost::filesystem::path file_to_read = base_dir / file;        
+    std::filesystem::path base_dir(path);
+    auto file_to_serve = file;
+    //if(!file_to_serve.empty() && file_to_serve[0]=='/') file_to_serve = file_to_serve.substr(1);
+    std::filesystem::path file_(file);
+    if(file_.is_absolute()) file_ = file_.relative_path();
+    std::filesystem::path file_to_read = base_dir / file_;
     LOG4CXX_INFO(logger, "serving file: "<<file_to_read.string());
-    boost::filesystem::file_status status = boost::filesystem::status(file_to_read);
-    if(status.type() != boost::filesystem::regular_file)
+    std::filesystem::file_status status = std::filesystem::status(file_to_read);
+    if(status.type() != std::filesystem::file_type::regular)
     {        
         throw web_not_found_exception("Cannot find "+file);
     }

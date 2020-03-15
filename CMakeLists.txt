@@ -2,22 +2,38 @@ cmake_minimum_required(VERSION 3.2)
 project(maild)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -pedantic -Wextra -fPIC")
 
 SET(MAILD_VERSION_MAJOR "0")
 SET(MAILD_VERSION_MINOR "0")
-SET(MAILD_VERSION_PATCH "3")
+SET(MAILD_VERSION_PATCH "4")
 
 add_definitions(-DMAILD_VERSION="${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
 
-if (NOT CMAKE_BUILD_TYPE)
-    message(STATUS "No build type selected, default to Release")
-    set(CMAKE_BUILD_TYPE "Release")
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+endif()
+
+if(CMAKE_CXX_STANDARD)
+    set(conan_std cppstd=${CMAKE_CXX_STANDARD})
+endif()
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(CMAKE_BUILD_TYPE EQUAL "Debug")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 endif()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+set(BEASTHTTP_DIR ${CMAKE_SOURCE_DIR}/external/beasthttp/BeastHttp)
+set(BEASTHTTP_INCLUDE ${BEASTHTTP_DIR}/include)
+
+file(GLOB_RECURSE HEADERS *.h *.hpp *.hxx )
+add_custom_target(Headers SOURCES ${HEADERS})
 
 add_subdirectory(lib)
 add_subdirectory(app)

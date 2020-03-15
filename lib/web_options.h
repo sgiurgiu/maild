@@ -22,7 +22,7 @@ private:
     int port = 8080;
     std::string domain_name = "sergiu-pc.zergiu.com";
     std::set<std::string> ips = {"127.0.0.1"};
-    std::string db_connection_string = "postgresql://maiaald:maild@localhost/maild";
+    std::string db_connection_string = "postgresql://maild:maild@localhost/maild";
     std::string files_dir = "www";
     std::string api_prefix = "/api";
 };
