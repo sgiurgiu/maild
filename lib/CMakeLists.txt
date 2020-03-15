@@ -34,7 +34,7 @@ set(LIBMAILD_SRCS
         utils.cpp)
 
 set(LIBRARY_NAME "maillib")        
-add_library(${LIBRARY_NAME}  SHARED ${LIBMAILD_SRCS})
+add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})
 
 
 target_link_libraries(${LIBRARY_NAME}  ${CMAKE_THREAD_LIBS_INIT})
