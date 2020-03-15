@@ -37,11 +37,11 @@ set(LIBRARY_NAME "maillib")
 add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})
 
 
-target_link_libraries(${LIBRARY_NAME}  ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(${LIBRARY_NAME} ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(${LIBRARY_NAME} ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
-target_link_libraries(${LIBRARY_NAME}  ${PSQLCXX_LIBS})
-target_link_libraries(${LIBRARY_NAME} ${MAGIC_LIB} ${MIMETIC_LIB})
+target_link_libraries(${LIBRARY_NAME} PUBLIC  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${OPENSSL_CRYPTO_LIBRARY})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${PSQLCXX_LIBS})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${MAGIC_LIB} ${MIMETIC_LIB})
 
 if (Tcmalloc_FOUND)
     target_link_libraries(${LIBRARY_NAME} ${Tcmalloc_LIBRARIES})
