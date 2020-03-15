@@ -10,22 +10,13 @@ using namespace maild;
 
 log4cxx::LoggerPtr session::logger(log4cxx::Logger::getLogger("session"));
 
-
-#if BOOST_VERSION_NUMBER_PATCH(BOOST_VERSION) >= 7000
 session::session(const boost::asio::executor& executor,
                  const server_options& options, complete_message_handler quit_handler)
                 : options(options), socket(executor),quit_handler(quit_handler),
                   session_start(std::chrono::steady_clock::now())
 {        
 }
-#else
-session::session(boost::asio::io_service& io_service,
-                 const server_options& options, complete_message_handler quit_handler)
-                : options(options), socket(io_service),quit_handler(quit_handler),
-                  session_start(std::chrono::steady_clock::now())
-{
-}
-#endif
+
 session::~session()
 {
     LOG4CXX_DEBUG(logger, "Deleting session");
