@@ -66,7 +66,7 @@ void web_server::run()
         boost::beast::http::response<boost::beast::http::string_body> rsp;
         rsp.result(boost::beast::http::status::not_found);
         rsp.version(request.version());
-        rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        rsp.set(boost::beast::http::field::server, MAILD_STRING);
         LOG4CXX_INFO(logger, " Resource not found "<<request.target().to_string());
         std::string contents = "Resource not found:"+request.target().to_string()+"\n";
         rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
@@ -119,7 +119,7 @@ void web_server::run()
 
    // Run the I/O service on the requested number of threads
    std::vector<std::thread> threads;
-   threads.reserve(pool_size > 0 ? pool_size : 4);
+   threads.reserve(pool_size > 0 ? pool_size : 2);
    for(uint32_t i = 0; i < pool_size; i++)
        threads.emplace_back(std::bind(static_cast<std::size_t (boost::asio::io_context::*)()>
                                       (&boost::asio::io_context::run), std::ref(ioc)));

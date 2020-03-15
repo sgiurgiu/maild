@@ -22,7 +22,7 @@ boost::beast::http::response<boost::beast::http::string_body>
         std::ifstream in (file_name);   
         rsp.result(boost::beast::http::status::ok);
         rsp.version(request.version());
-        rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        rsp.set(boost::beast::http::field::server, MAILD_STRING);
         std::string contents = (static_cast<std::stringstream const&>(std::stringstream() << in.rdbuf()).str());
         rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
         std::string mime = get_mime_type(file_name);

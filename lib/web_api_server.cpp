@@ -46,7 +46,7 @@ web_api_server::response web_api_server::get_users_mails(const request& request,
     response rsp;
     rsp.result(boost::beast::http::status::ok);
     rsp.version(request.version());
-    rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+    rsp.set(boost::beast::http::field::server, MAILD_STRING);
     rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
     rsp.set(boost::beast::http::field::content_type,"application/json; charset=UTF-8");
     rsp.body() = (contents);
@@ -65,7 +65,7 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
         {
             rsp.result(boost::beast::http::status::ok);
             rsp.version(request.version());
-            rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+            rsp.set(boost::beast::http::field::server, MAILD_STRING);
             
             std::string body_raw = result[0][0].as<std::string>();
             if(type == "raw")
@@ -95,7 +95,7 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
         {
             rsp.result(boost::beast::http::status::not_found);
             rsp.version(request.version());
-            rsp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+            rsp.set(boost::beast::http::field::server, MAILD_STRING);
             rsp.body() = ("Not found");
         }
     }
