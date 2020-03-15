@@ -17,7 +17,6 @@ class session
 {
 public:
     typedef std::function<void(session*)> complete_message_handler;
-#if BOOST_VERSION_NUMBER_PATCH(BOOST_VERSION) >= 7000
     session(const boost::asio::executor& executor, const server_options& options, complete_message_handler quit_handler);
     ~session() ;//= default;
     session ( const session& ) = delete;
