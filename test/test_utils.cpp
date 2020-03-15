@@ -73,3 +73,10 @@ TEST_F(UtilsTest,ParseBodyTextPartLinkedinEmail)
     string html_body = utils::get_part(test_file,{"text","plain"});
     EXPECT_EQ(html_body.length(),7298);
 }
+TEST_F(UtilsTest, ParseUtf8Subject)
+{
+    EXPECT_EQ(utils::parse_utf8_string("aa"),"aa");
+
+    EXPECT_EQ(utils::parse_utf8_string("=?utf-8?Q?=E2=9C=88=EF=B8=8F=C2=A0=5BTRAVEL=20INSURANCE=5D=20|=20Optimal=20Travel=E2=84=A2=20Insurance?="),
+            "a@a.com");
+}

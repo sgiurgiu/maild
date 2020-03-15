@@ -1,6 +1,43 @@
 #include "utils.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace maild;
+
+
+std::string utils::parse_utf8_string(const std::string& subj)
+{
+    auto lowersubj = boost::algorithm::to_lower_copy(subj);
+    if(subj.empty() || lowersubj.find("=?utf-8?") != 0
+            || lowersubj.find("?=") == lowersubj.npos)
+    {
+        return subj;
+    }
+    if(subj.size() < 12) return subj;
+    char encoding = subj[8];
+    if(encoding != 'Q' && encoding != 'q' && encoding != 'B' && encoding != 'b')
+    {
+        return subj;
+    }
+    std::string stringToDecode = subj.substr(10,subj.size()-12);
+    if(encoding == 'Q' || encoding == 'q')
+    {
+        mimetic::QP::Decoder decoder;
+
+        std::string outString;
+        decoder.process(stringToDecode.begin(), stringToDecode.end(),std::back_inserter<std::string>(outString));
+        return outString;
+    }
+
+    if(encoding == 'B' || encoding == 'b')
+    {
+        mimetic::Base64::Decoder decoder;
+        std::string outString;
+        decoder.process(stringToDecode.begin(), stringToDecode.end(),std::back_inserter<std::string>(outString));
+        return outString;
+    }
+
+    return subj;
+}
 
 std::string utils::get_part(mimetic::MimeEntity* me,
                                    const std::vector<std::string>& types,
@@ -43,6 +80,7 @@ std::string utils::get_part(mimetic::MimeEntity* me,
             if(transferEncoding == mimetic::ContentTransferEncoding::quoted_printable)
             {
                 mimetic::QP::Decoder decoder;
+
                 std::string outBody;
                 decoder.process(body.begin(), body.end(),std::back_inserter<std::string>(outBody));
                 body.set(outBody);

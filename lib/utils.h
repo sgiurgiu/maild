@@ -42,10 +42,12 @@ namespace maild {
 
             return address.substr(index1+1,index2-index1-1);
         }
+        static std::string parse_utf8_string(const std::string& subj);
+
         static std::string get_subject(std::istream& in)
         {
             mimetic::MimeEntity me(in);
-            return me.header().subject();
+            return parse_utf8_string(me.header().subject());
         }
         
         static std::string get_part(std::istream& in,const std::vector<std::string>& types)

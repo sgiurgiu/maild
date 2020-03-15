@@ -12,6 +12,7 @@ find_package(Tcmalloc)
 find_package(Threads)
 find_library(MAGIC_LIB magic)
 find_library(MIMETIC_LIB mimetic)
+#this is needed when pqxx is statically compiled
 find_library(PQ_LIB pq)
 
 include_directories(${Boost_INCLUDE_DIR} ${BEASTHTTP_INCLUDE})
