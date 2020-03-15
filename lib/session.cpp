@@ -19,7 +19,7 @@ session::session(const boost::asio::executor& executor,
 {        
 }
 #else
-session::session(const boost::asio::io_service& io_service,
+session::session(boost::asio::io_service& io_service,
                  const server_options& options, complete_message_handler quit_handler)
                 : options(options), socket(io_service),quit_handler(quit_handler),
                   session_start(std::chrono::steady_clock::now())
