@@ -46,13 +46,16 @@ void web_server::run()
     // Set router targets
     using pack2 = http::param::pack<int,  std::string>;
     router.param<pack2>().get("/api/mails/(\\d+)/(\\w+)",
-                              [this](const auto& request, auto context, auto args) {
+                              [this](auto request, auto context, auto args) {
         web_api_server api_server(options.get_db_connection_string());
-        context.send(api_server.get_mail(request,std::get<0>(args),std::get<1>(args)));
+        auto id = std::get<0>(args);
+        auto type = std::get<1>(args);
+        LOG4CXX_DEBUG(logger, "Retrieving mail for id "<<id<<" and type "<<type<<" for url:"<<request.target().to_string());
+        context.send(api_server.get_mail(request,id,type));
     });
     using pack3 = http::param::pack<std::string>;
     router.param<pack3>().get("/api/mails/(\\w+)",
-                              [this](const auto& request, auto context, auto args) {
+                              [this](auto request, auto context, auto args) {
         web_api_server api_server(options.get_db_connection_string());
         context.send(api_server.get_users_mails(request,std::get<0>(args)));
     });
@@ -91,7 +94,6 @@ void web_server::run()
     // Handler incoming connections
     const auto& onAccept = [&](auto asio_socket) {
         auto endpoint = asio_socket.remote_endpoint();
-
         http::out::prefix::version::time::pushn<std::ostream>(
                     out, endpoint.address().to_string() + ':' + std::to_string(endpoint.port()), "connected!");
 
@@ -115,7 +117,7 @@ void web_server::run()
         ioc.stop();
     });
 
-    uint32_t pool_size = std::thread::hardware_concurrency() * 2;
+    uint32_t pool_size = 1;//std::thread::hardware_concurrency();
 
    // Run the I/O service on the requested number of threads
    std::vector<std::thread> threads;

@@ -30,7 +30,8 @@ set(LIBMAILD_SRCS
         web_file_server.cpp
         web_not_found_exception.cpp
         magic_handler.cpp
-        web_api_server.cpp)
+        web_api_server.cpp
+        utils.cpp)
 
 set(LIBRARY_NAME "maillib")        
 add_library(${LIBRARY_NAME}  SHARED ${LIBMAILD_SRCS})
