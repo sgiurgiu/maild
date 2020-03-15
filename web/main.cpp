@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <log4cxx/basicconfigurator.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -34,9 +34,8 @@ int main(int argc, char **argv) {
         return 1;
     }
     
-    boost::filesystem::path log_file(arguments.log_file);
-    boost::filesystem::file_status status = boost::filesystem::status(log_file);
-    if(status.type() != boost::filesystem::regular_file)
+    std::filesystem::path log_file(arguments.log_file);
+    if(!std::filesystem::is_regular_file(log_file))
     {
         std::cout << arguments.log_file << " cannot be found, using default logging settings"<< std::endl;
         log4cxx::BasicConfigurator::configure();        
@@ -55,9 +54,8 @@ int main(int argc, char **argv) {
         logger->setLevel(log4cxx::Level::getFatal());
     }
     
-    boost::filesystem::path conf_file(arguments.config_file);
-    status = boost::filesystem::status(conf_file);
-    if(status.type() != boost::filesystem::regular_file)
+    std::filesystem::path conf_file(arguments.config_file);
+    if(!std::filesystem::is_regular_file(conf_file))
     {
         std::cout << arguments.config_file << " is not a regular file"<< std::endl;
         return 1;
