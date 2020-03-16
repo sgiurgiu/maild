@@ -56,6 +56,7 @@ namespace maild {
             return get_part(&me,types);            
         }
     private:
+        static std::string::size_type get_next_utf8_part(const std::string& subj, std::string& decodedString);
         static std::string get_part(mimetic::MimeEntity* me,const std::vector<std::string>& types, std::string boundary = "");
         
 
