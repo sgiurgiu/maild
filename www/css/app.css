@@ -1,14 +1,11 @@
 body {
-  padding-top: 10px;
-  margin-bottom: 60px;
-}
-.container-mode {
-  padding: 40px 15px;
-  text-align: center;
+  padding-top: 60px;
+  margin-bottom: 10px;
 }
 
 .selectable {
-    cursor: pointer; cursor: hand;
+  cursor: pointer;
+  /*color: var(--primary);*/
 }
 .footer {
   position: absolute;

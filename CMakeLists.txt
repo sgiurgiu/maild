@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.2)
 project(maild)
 
+option(TESTS_ENABLED "Enable tests" ON)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 SET(MAILD_VERSION_MAJOR "0")
@@ -38,9 +40,10 @@ add_custom_target(Headers SOURCES ${HEADERS})
 
 add_subdirectory(lib)
 add_subdirectory(app)
-add_subdirectory(test)
 add_subdirectory(web)
-
+if(TESTS_ENABLED)
+    add_subdirectory(test)
+endif()
 SET(CPACK_PACKAGE_NAME "maild")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MailD")
 SET(CPACK_RESOURCE_FILE_LICENSE_PROVIDED FALSE)
