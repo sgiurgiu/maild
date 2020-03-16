@@ -32,9 +32,9 @@ std::string::size_type utils::get_next_utf8_part(const std::string& subj,std::st
         decodedString.append(subj);
         return subj.npos;
     }
-    auto utf8StartMarker = 9;
-    auto utf8EndMarker = subj.find("?=",utf8StartMarker+1);
-    std::string stringToDecode = subj.substr(utf8StartMarker+1,utf8EndMarker-utf8StartMarker-1);
+    auto utf8StartMarker = 10;
+    auto utf8EndMarker = subj.find("?=",utf8StartMarker);
+    std::string stringToDecode = subj.substr(utf8StartMarker,utf8EndMarker-utf8StartMarker);
     if(encoding == 'Q' || encoding == 'q')
     {
         mimetic::QP::Decoder decoder;
