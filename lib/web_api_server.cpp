@@ -1,15 +1,14 @@
 #include "web_api_server.h"
 #include <pqxx/transaction>
-
-#define PICOJSON_USE_INT64
-#include "picojson.h"
+#include "json.hpp"
 #include "utils.h"
 #include <chrono>
 #include <iomanip>
 #include <sstream>
 
-
+using json = nlohmann::json;
 using namespace maild;
+
 log4cxx::LoggerPtr web_api_server::logger(log4cxx::Logger::getLogger("web_api_server"));
 
 web_api_server::web_api_server()
@@ -27,22 +26,21 @@ web_api_server::response web_api_server::get_users_mails(const request& request,
     pqxx::result result = w.exec_prepared("get_users_mails",user);
     w.commit();        
     const int num_rows = result.size();
-    picojson::array mails_array;    
+    json mails_array = json::array();
     for (int rownum=0; rownum < num_rows; ++rownum)
     {
         const pqxx::row row = result[rownum];
-        picojson::object mail_row;
+        json mail_row = json::object();
         std::string body_raw = row[2].as<std::string>();
-        mail_row["from"] = picojson::value(row[0].c_str());
-        mail_row["to"] = picojson::value(row[1].c_str());        
-        mail_row["date"] = picojson::value(row[3].c_str());
-        mail_row["id"] = picojson::value(row[4].as<int64_t>());
+        mail_row["from"] = row[0].as<std::string>();
+        mail_row["to"] = row[1].as<std::string>();
+        mail_row["date"] = row[3].as<std::string>();
+        mail_row["id"] = row[4].as<int64_t>();
         std::stringstream body_raw_stream(body_raw);        
-        mail_row["subject"] = picojson::value(utils::get_subject(body_raw_stream));
-        mails_array.push_back(picojson::value(mail_row));
-    }    
-    picojson::value val(mails_array);
-    std::string contents = val.serialize(false);
+        mail_row["subject"] = utils::get_subject(body_raw_stream);
+        mails_array.push_back(mail_row);
+    }
+    std::string contents = mails_array.dump();
     response rsp;
     rsp.result(boost::beast::http::status::ok);
     rsp.version(request.version());

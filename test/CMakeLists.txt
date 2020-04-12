@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.15)
 project(libmaild_test)
 
 configure_file(${CMAKE_SOURCE_DIR}/cmake/GoogleTest-CMakeLists.txt.in ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)

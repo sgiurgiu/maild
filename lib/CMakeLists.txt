@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.15)
 project(libmaild)
 
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 
-find_package(Boost 1.70 REQUIRED)
+find_package(Boost 1.72 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_library(LOG4CXX_LIBS log4cxx)
 find_library(PSQLCXX_LIBS pqxx)
@@ -46,7 +46,7 @@ target_link_libraries(${LIBRARY_NAME} PUBLIC ${PSQLCXX_LIBS} ${PQ_LIB})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${MAGIC_LIB} ${MIMETIC_LIB})
 
 if (Tcmalloc_FOUND)
-    target_link_libraries(${LIBRARY_NAME} ${Tcmalloc_LIBRARIES})
+    target_link_libraries(${LIBRARY_NAME} PUBLIC ${Tcmalloc_LIBRARIES})
 endif(Tcmalloc_FOUND)
 
 install(TARGETS ${LIBRARY_NAME}  LIBRARY DESTINATION lib)
