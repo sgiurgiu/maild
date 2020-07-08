@@ -10,7 +10,7 @@ Type=simple
 ExecStart=/usr/bin/maild -c /etc/maild/maild.conf -l /etc/maild/log.properties
 User=maild
 Group=maild
-Restart=on-abort
+Restart=always
 
 [Install]
 WantedBy=multi-user.target default.target

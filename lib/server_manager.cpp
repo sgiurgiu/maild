@@ -15,7 +15,8 @@ using boost::asio::ip::tcp;
 
 log4cxx::LoggerPtr server_manager::logger(log4cxx::Logger::getLogger("server_manager"));
 
-server_manager::server_manager(const server_options& options):options(options),signals(io_service, SIGINT, SIGTERM)
+server_manager::server_manager(const server_options& options):options(options),
+    signals(io_context, SIGINT, SIGTERM)
 {    
     start_cleanup_thread();
 }
@@ -76,22 +77,40 @@ void server_manager::start_cleanup_thread()
 
 void server_manager::run()
 {
-  std::vector<std::unique_ptr<smtp_server>> servers;
+  std::vector<std::unique_ptr<smtp_server>> servers;  
   for(const auto& address : options.get_ips())
   {
-    servers.push_back(std::make_unique<smtp_server>(io_service,address,options))  ;
+      auto server = std::make_unique<smtp_server>(io_context,address,options);
+      server->run();
+      servers.push_back(std::move(server));
   }
   signals.async_wait(
     [this](const boost::system::error_code& /*error*/, int /*signal_number*/){
         stop();
     });
-  
-  io_service.run();
+
+  auto num_threads = std::thread::hardware_concurrency() - 1;
+  num_threads = num_threads > 0 ? num_threads : 1;
+  std::vector<std::thread> v;
+  v.reserve(num_threads);
+  for(size_t i =0;i<num_threads;i++) {
+      v.emplace_back([this](){
+          io_context.run();
+      });
+  }
+
+  for(size_t i =0;i<num_threads;i++) {
+      if(v.at(i).joinable()) {
+        v.at(i).join();
+      }
+  }
+
 }
 
 void server_manager::stop()
 {
   LOG4CXX_INFO(logger, "Received stop command.");
   cleanup_done.store(true);
-  io_service.stop();  
+  stop_condition.notify_all();
+  io_context.stop();
 }

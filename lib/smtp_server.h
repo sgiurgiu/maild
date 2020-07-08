@@ -15,7 +15,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <atomic>
-#include <pqxx/connection>
 
 namespace maild {
 
@@ -28,11 +27,11 @@ public:
     smtp_server (smtp_server&& ) = delete;
     smtp_server& operator= ( const smtp_server& ) = delete;
     smtp_server& operator= (smtp_server&& ) = delete;
-        
+    void run();
 private:
     void remove_session(session* s);
     void start_accept();
-    void handle_accept(session_ptr new_session, const boost::system::error_code& error);
+    void handle_accept(const boost::system::error_code& error,session_ptr new_session);
     void save_message(const mail& mail_message);
 private:
     template<class T> struct session_ptr_equals
@@ -43,14 +42,8 @@ private:
         }
     };    
     server_options options;  
-    boost::asio::ip::tcp::acceptor acceptor;    
-    active_object ao;
-    std::unordered_set<session_ptr,std::hash<session_ptr>,session_ptr_equals<session_ptr>> sessions;
-    pqxx::connection db;
-    std::thread cleanup_sessions_thread;
-    std::condition_variable cleanup_sessions_wait_condition;
-    std::atomic_bool cleanup_done{false};
-    std::mutex cleanup_mutex;
+    boost::asio::io_service& io_service;
+    boost::asio::ip::tcp::acceptor acceptor;            
     static log4cxx::LoggerPtr logger;
 };
 }

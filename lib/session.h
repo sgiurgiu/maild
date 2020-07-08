@@ -5,6 +5,7 @@
 #include "mail.h"
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/asio/streambuf.hpp>
 #include <memory>
 #include <string>
@@ -13,11 +14,10 @@
 #include <log4cxx/logger.h>
 
 namespace maild {
-class session
+class session : public std::enable_shared_from_this<session>
 {
 public:
-    typedef std::function<void(session*)> complete_message_handler;
-    session(const boost::asio::executor& executor, const server_options& options, complete_message_handler quit_handler);
+    session(boost::asio::io_service& io_service, const server_options& options);
     ~session() ;//= default;
     session ( const session& ) = delete;
     session ( session&& ) = delete;
@@ -31,7 +31,13 @@ public:
     {
         return session_start;
     }
+    std::shared_ptr<session> get_session()
+    {
+        return shared_from_this();
+    }
+
 private:    
+    void on_start();
     void handle_write_greeting(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_read_greeting_response(const boost::system::error_code& error,
                                        std::size_t bytes_transferred);
@@ -44,10 +50,10 @@ private:
     void handle_auth_command(const std::string& command_param);
 private:
     server_options options;  
+    boost::asio::strand<boost::asio::io_context::executor_type> strand;
     boost::asio::ip::tcp::socket socket;
     boost::asio::streambuf response;
     boost::asio::streambuf request; 
-    complete_message_handler quit_handler;
     mail mail_message;
     std::chrono::time_point<std::chrono::steady_clock> session_start;
     static log4cxx::LoggerPtr logger;
