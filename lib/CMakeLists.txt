@@ -33,7 +33,15 @@ set(LIBMAILD_SRCS
         web_not_found_exception.cpp
         magic_handler.cpp
         web_api_server.cpp
-        utils.cpp)
+        utils.cpp
+        smtp_command.cpp
+        hello_command.cpp
+        ehlo_command.cpp
+        mail_command.cpp
+        rcpt_command.cpp
+        data_command.cpp
+        quit_command.cpp
+        auth_command.cpp)
 
 set(LIBRARY_NAME "maillib")        
 add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})

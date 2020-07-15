@@ -20,7 +20,7 @@ smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string&
    acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
    acceptor.bind(endpoint);
    acceptor.listen();
-  LOG4CXX_INFO(logger, "Starting to accept connections on address "<<listen_address<<" and port "<<options.get_plain_port());
+   LOG4CXX_INFO(logger, "Starting to accept connections on address "<<listen_address<<" and port "<<options.get_plain_port());
 }
 
 smtp_server::~smtp_server()
