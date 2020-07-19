@@ -6,7 +6,6 @@
 #define MAILD_WEB_FILE_SERVER_H
 
 #include <string>
-#include <log4cxx/logger.h>
 #include <memory>
 #include <boost/beast.hpp>
 #include <filesystem>
@@ -30,7 +29,6 @@ private:
 private:
     std::string path;    
     std::unique_ptr<magic_handler> magic;
-    static log4cxx::LoggerPtr logger;
 };
 }
 

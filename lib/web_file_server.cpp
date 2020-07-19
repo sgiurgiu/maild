@@ -3,9 +3,9 @@
 #include "magic_handler.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
+#include <spdlog/spdlog.h>
 
 using namespace maild;
-log4cxx::LoggerPtr web_file_server::logger(log4cxx::Logger::getLogger("web_file_server"));
 
 web_file_server::web_file_server(const std::string& path):path(path),magic(std::make_unique<magic_handler>())
 {
@@ -26,7 +26,7 @@ boost::beast::http::response<boost::beast::http::string_body>
         std::string contents = (static_cast<std::stringstream const&>(std::stringstream() << in.rdbuf()).str());
         rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
         std::string mime = get_mime_type(file_name);
-        LOG4CXX_DEBUG(logger, "file: "<<file<<" has mime "<<mime);
+        spdlog::debug("file: {} has mime {}",file,mime);
         rsp.set(boost::beast::http::field::content_type,mime);
         rsp.body() = contents;
     }
@@ -50,7 +50,7 @@ std::filesystem::path web_file_server::get_file(const std::string& file)
     std::filesystem::path file_(file);
     if(file_.is_absolute()) file_ = file_.relative_path();
     std::filesystem::path file_to_read = base_dir / file_;
-    LOG4CXX_INFO(logger, "serving file: "<<file_to_read.string());
+    spdlog::info( "serving file: {}",file_to_read.string());
     std::filesystem::file_status status = std::filesystem::status(file_to_read);
     if(status.type() != std::filesystem::file_type::regular)
     {        

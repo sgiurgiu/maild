@@ -3,7 +3,7 @@
 
 #include "smtp_command.h"
 #include "mail.h"
-#include <log4cxx/logger.h>
+
 
 namespace maild {
 
@@ -13,7 +13,6 @@ public:
     mail_command(boost::asio::ip::tcp::socket& socket,mail& mail_message);
     void execute(boost::asio::streambuf& buffer,complete_handler_t complete_handler) override;
 private:
-    static log4cxx::LoggerPtr logger;
     mail& mail_message;
 };
 

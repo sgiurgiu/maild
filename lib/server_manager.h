@@ -8,7 +8,6 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <log4cxx/logger.h>
 
 namespace maild {
 
@@ -32,7 +31,6 @@ private:
     server_options options;    
     boost::asio::io_context io_context;
     boost::asio::signal_set signals;
-    static log4cxx::LoggerPtr logger;
 };
 
 }

@@ -6,10 +6,11 @@
 #include <iomanip>
 #include <sstream>
 
+#include <spdlog/spdlog.h>
+
 using json = nlohmann::json;
 using namespace maild;
 
-log4cxx::LoggerPtr web_api_server::logger(log4cxx::Logger::getLogger("web_api_server"));
 
 web_api_server::web_api_server()
 {

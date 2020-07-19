@@ -3,7 +3,6 @@
 
 #include <string>
 #include <pqxx/connection>
-#include <log4cxx/logger.h>
 #include <boost/beast.hpp>
 
 namespace mimetic {
@@ -23,8 +22,6 @@ public:
     response get_mail(const request& request,int id,const std::string& type);
 private:
     pqxx::connection db;
-    static log4cxx::LoggerPtr logger;
-
 };
 }
 

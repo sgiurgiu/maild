@@ -10,10 +10,10 @@
 #include <iomanip>
 #include <sstream>
 
+#include <spdlog/spdlog.h>
+
 using namespace maild;
 using boost::asio::ip::tcp;
-
-log4cxx::LoggerPtr server_manager::logger(log4cxx::Logger::getLogger("server_manager"));
 
 server_manager::server_manager(const server_options& options):options(options),
     signals(io_context, SIGINT, SIGTERM)
@@ -41,7 +41,7 @@ void server_manager::start_cleanup_thread()
             std::string sql = "delete from mails where date_received <= NOW() - interval '";
             sql+= std::to_string(options.get_keep_mail_seconds());
             sql+=" seconds'";
-            LOG4CXX_DEBUG(logger, "Deletion sql "<<sql);
+            spdlog::debug("Deletion sql {}",sql);
             db.prepare("delete_mail",sql);
             while(!cleanup_done.load())
             {                
@@ -50,7 +50,7 @@ void server_manager::start_cleanup_thread()
                 w.commit();
                 if(!cleanup_done.load() && result.affected_rows() > 0)
                 {
-                    LOG4CXX_INFO(logger, "Deleted "<<result.affected_rows()<<" mails");
+                    spdlog::info("Deleted {} mails",result.affected_rows());
                 }
                 std::unique_lock<std::mutex> lock(mu);
                 stop_condition.wait_for(lock,std::chrono::seconds(options.get_check_mail_interval_seconds()));                
@@ -60,14 +60,14 @@ void server_manager::start_cleanup_thread()
         {
             if(!cleanup_done.load())
             {
-                LOG4CXX_ERROR(logger, "Deleting rows encountered an exception: "<<ex.what());
+                spdlog::error("Deleting rows encountered an exception: {}",ex.what());
             }            
         }
         catch(...)
         {
             if(!cleanup_done.load())
             {
-                LOG4CXX_ERROR(logger, "Deleting rows encountered an unknown exception");
+                spdlog::error("Deleting rows encountered an unknown exception");
             }            
         }
 
@@ -78,9 +78,11 @@ void server_manager::start_cleanup_thread()
 void server_manager::run()
 {
   std::vector<std::unique_ptr<smtp_server>> servers;  
-  for(const auto& address : options.get_ips())
+  for(const auto& server_info : options.get_servers())
   {
-      auto server = std::make_unique<smtp_server>(io_context,address,options);
+      if(!server_info.enabled) continue;
+      auto server = std::make_unique<smtp_server>(io_context,options.get_db_connection_string(),
+                                                  server_info,options.get_domain_name());
       server->run();
       servers.push_back(std::move(server));
   }
@@ -109,7 +111,7 @@ void server_manager::run()
 
 void server_manager::stop()
 {
-  LOG4CXX_INFO(logger, "Received stop command.");
+  spdlog::info( "Received stop command.");
   cleanup_done.store(true);
   stop_condition.notify_all();
   io_context.stop();

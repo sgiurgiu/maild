@@ -4,8 +4,9 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/algorithm/string.hpp>
+#include <spdlog/spdlog.h>
 namespace maild {
-log4cxx::LoggerPtr auth_command::logger(log4cxx::Logger::getLogger("auth_command"));
+
 auth_command::auth_command(boost::asio::ip::tcp::socket& socket):
     smtp_command(socket)
 {
@@ -16,7 +17,7 @@ void auth_command::execute(boost::asio::streambuf& buffer,complete_handler_t com
     std::string auth_method;
     input >> auth_method;
     std::transform(auth_method.begin(), auth_method.end(), auth_method.begin(),[](unsigned char c){return std::toupper(c);});
-    LOG4CXX_DEBUG(logger, "Got auth method: "<<auth_method);
+    spdlog::debug("Got auth method: {}",auth_method);
     //get the rest of the line if any
     std::string potential_name;
     std::getline(input,potential_name);

@@ -3,7 +3,6 @@
 
 #include "smtp_command.h"
 #include "mail.h"
-#include <log4cxx/logger.h>
 
 namespace maild {
 
@@ -23,7 +22,6 @@ private:
                                   const boost::system::error_code& error,
                                   std::size_t bytes_transferred);
 private:
-    static log4cxx::LoggerPtr logger;
     mail& mail_message;
 };
 

@@ -1,16 +1,31 @@
-{
-    "database_url" : "postgresql://maild:maild@localhost/maild",
-    "domain":"xvknp.com",
-    "keep_mail":3600,
-    "check_mail_interval":60,
-    "ips":["0.0.0.0"],
+[main]
+database_url="postgresql://maild:maild@localhost/maild"
+domain="xvknp.com"
+keep_mail=3600
+check_mail_interval=60
 
-    "plain": {
-        "port": 25,
-        "enabled" :true
-    },
-    "secure":{
-        "port":465,
-        "enabled":true
-    }
-}
+[servers]
+    [servers.plain]
+        ip="0.0.0.0"
+        port=25
+        enabled=true
+        ssl=false
+
+    [servers.secure]
+        ip="0.0.0.0"
+        port=465
+        enabled=false
+        ssl=true
+[log]
+    [log.console]
+        type="console"
+        level="debug"
+        pattern="[%D %T] [%l] %v"
+    [log.file]
+        type="rotating_file"
+        level="debug"
+        pattern="[%D %T] [%l] %v"
+        file="/var/log/maild.log"
+        max_size=10000000
+        max_files=25
+

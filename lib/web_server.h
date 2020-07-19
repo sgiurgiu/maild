@@ -13,7 +13,6 @@ public:
 private:    
 private:
     web_options options;
-    static log4cxx::LoggerPtr logger;
 };
 
 }

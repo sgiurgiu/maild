@@ -1,10 +1,10 @@
 #include "web_options.h"
-#include "json.hpp"
 #include <stdexcept>
-#include <log4cxx/logger.h>
+#include <spdlog/spdlog.h>
+#include "toml.hpp"
+#include "utils.h"
 
 using namespace maild;
-using json = nlohmann::json;
 
 web_options::web_options()
 {
@@ -12,33 +12,44 @@ web_options::web_options()
 }
 void web_options::load(std::istream& conf_stream)
 {
-  log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("web_options"));
-  LOG4CXX_DEBUG(logger, "Parsing web options");
-  auto conf_value = json::parse(conf_stream);
-  if(!conf_value.is_object())
-  {
+    toml::parse_result configuration;
+    try
+    {
+        configuration = toml::parse(conf_stream);
+    }
+    catch(const toml::parse_error& er)
+    {
+      throw;
+    }
+
+    if(configuration.empty())
+    {
       throw std::runtime_error("Invalid configuration file");
-  }
-  db_connection_string = conf_value["database_url"].get<std::string>();
-  LOG4CXX_DEBUG(logger, "db_connection_string:"<<db_connection_string);
-  domain_name = conf_value["domain"].get<std::string>();
-  LOG4CXX_DEBUG(logger, "domain_name:"<<domain_name);
-  files_dir = conf_value["files_dir"].get<std::string>();
-  LOG4CXX_DEBUG(logger, "files_dir:"<<files_dir);
-  api_prefix = conf_value["api_prefix"].get<std::string>();
-  LOG4CXX_DEBUG(logger, "api_prefix:"<<api_prefix);
-  port = conf_value["port"].get<int>();
-  LOG4CXX_DEBUG(logger, "port:"<<port);
-  auto ips_value = conf_value["ips"];
-  if(ips_value.is_array())
-  {
+    }
+
+    utils::configure_logs(configuration["log"]);
+    auto main_conf = configuration["main"];
+
+    db_connection_string = main_conf["database_url"].value_or(db_connection_string);
+    spdlog::debug("db_connection_string: {}",db_connection_string);
+    domain_name = main_conf["domain"].value_or(domain_name);
+    spdlog::debug( "domain_name: {}",domain_name);
+    files_dir = main_conf["files_dir"].value_or(files_dir);
+    spdlog::debug( "files_dir:{}",files_dir);
+    api_prefix = main_conf["api_prefix"].value_or(api_prefix);
+    spdlog::debug( "api_prefix:{}",api_prefix);
+    port = main_conf["port"].value_or(8080);
+    spdlog::debug( "port:{}",port);
+    auto ips_value = main_conf["ips"];
+    if(ips_value.is_array())
+    {
       ips.clear();
-      for(const auto& ip_value : ips_value)
-      {          
-          auto inserted = ips.insert(ip_value.get<std::string>());
-          LOG4CXX_DEBUG(logger, "ips:"<<(*inserted.first));
+      for(const auto& ip_value : *ips_value.as_array())
+      {
+          auto inserted = ips.insert(ip_value.value_or<std::string>("127.0.0.1"));
+          spdlog::debug( "ips:{}",(*inserted.first));
       }
-  }
+    }
 }
 
 int web_options::get_port() const

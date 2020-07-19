@@ -5,22 +5,23 @@
 #include <iomanip>
 #include <sstream>
 #include <boost/bind.hpp>
+#include <spdlog/spdlog.h>
 
 using namespace maild;
 using boost::asio::ip::tcp;
 
-log4cxx::LoggerPtr smtp_server::logger(log4cxx::Logger::getLogger("smtp_server"));
-
-smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string& listen_address, const server_options& options)
-    : options(options),io_service(io_service),acceptor(io_service)
+smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string& db_connection_string,
+                         const server& server_options,const std::string& domain_name)
+    : db_connection_string(db_connection_string),domain_name(domain_name),
+      io_service(io_service),acceptor(io_service)
 {
-    tcp::endpoint endpoint(boost::asio::ip::address::from_string(listen_address),
-                           options.get_plain_port());
+    tcp::endpoint endpoint(boost::asio::ip::address::from_string(server_options.ip),
+                           server_options.port);
    acceptor.open(endpoint.protocol());
    acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
    acceptor.bind(endpoint);
    acceptor.listen();
-   LOG4CXX_INFO(logger, "Starting to accept connections on address "<<listen_address<<" and port "<<options.get_plain_port());
+   spdlog::info("Starting to accept connections on address {} and port {}",server_options.ip,server_options.port);
 }
 
 smtp_server::~smtp_server()
@@ -33,8 +34,8 @@ void smtp_server::run()
 }
 void smtp_server::start_accept()
 {
-    LOG4CXX_INFO(logger, "Waiting for client...");    
-    session_ptr new_session = std::make_shared<session>(io_service,options);
+    spdlog::info( "Waiting for client...");
+    session_ptr new_session = std::make_shared<session>(io_service,db_connection_string,domain_name);
     acceptor.async_accept(new_session->get_socket(),
                           boost::bind(&smtp_server::handle_accept,this,boost::asio::placeholders::error,
                                       new_session));
@@ -44,14 +45,14 @@ void smtp_server::handle_accept(const boost::system::error_code& error,session_p
 {    
     if(!error)
     {    
-        LOG4CXX_INFO(logger, "Got new client connection, starting session");
+        spdlog::info( "Got new client connection, starting session");
         new_session->start();
 
         start_accept();
     }
     else
     {
-        LOG4CXX_ERROR(logger, "Could not accept new connection from client. Message:"<<error.message());
+        spdlog::error( "Could not accept new connection from client. Message: {}",error.message());
     }
 }
 

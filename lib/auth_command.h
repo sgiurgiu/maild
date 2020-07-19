@@ -2,7 +2,6 @@
 #define MAILD_AUTH_COMMAND_H
 
 #include "smtp_command.h"
-#include <log4cxx/logger.h>
 
 namespace maild {
 
@@ -19,8 +18,6 @@ private:
     void read_login_password(boost::asio::streambuf& buffer,complete_handler_t complete_handler);
     void write_login_ask_for_username(boost::asio::streambuf& buffer,complete_handler_t complete_handler);
     void read_login_username(boost::asio::streambuf& buffer,complete_handler_t complete_handler);
-    static log4cxx::LoggerPtr logger;
-
 };
 
 } // namespace maild

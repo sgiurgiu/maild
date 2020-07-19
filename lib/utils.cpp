@@ -1,7 +1,42 @@
 #include "utils.h"
 #include <boost/algorithm/string.hpp>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 using namespace maild;
+
+void utils::configure_logs(const toml::node_view<toml::node>& logs_conf)
+{
+    std::vector<spdlog::sink_ptr> sinks;
+    for(const auto& log_conf : *logs_conf.as_table())
+    {
+        auto& value = *(log_conf.second.as_table());
+        auto type = value["type"].value_or("console");
+        auto level = value["level"].value_or("info");
+        auto pattern = value["pattern"].value_or("[%D %T] [%l] %v");
+        if(type == "console")
+        {
+            auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+            console->set_pattern(std::string(pattern));
+            console->set_level(spdlog::level::from_str(std::string(level)));
+            sinks.push_back(console);
+        }
+        else if(type == "rotating_file")
+        {
+            auto file_name = value["file"].value_or("maild.log");
+            auto max_size = value["max_size"].value_or(1000000);
+            auto max_files = value["max_files"].value_or(10);
+            auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(std::string(file_name),max_size,max_files);
+            file->set_pattern(std::string(pattern));
+            file->set_level(spdlog::level::from_str(std::string(level)));
+        }
+    }
+    std::shared_ptr<spdlog::logger> all_logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(),sinks.end());
+    all_logger->set_level(spdlog::level::trace);
+    spdlog::register_logger(all_logger);
+    spdlog::set_default_logger(all_logger);
+}
 
 std::string::size_type utils::get_next_utf8_part(const std::string& subj,std::string& decodedString)
 {
@@ -66,8 +101,7 @@ std::string utils::parse_utf8_string(const std::string& subj)
 std::string utils::get_part(mimetic::MimeEntity* me,
                                    const std::vector<std::string>& types,
                                    std::string boundary)
-{
-    log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("utils"));
+{    
     std::string subtype = me->header().contentType().subtype();
     if(me->header().contentType().isMultipart())
     {

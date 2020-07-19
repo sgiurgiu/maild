@@ -13,13 +13,13 @@
 #include <string>
 #include <chrono>
 #include <map>
-#include <log4cxx/logger.h>
 
 namespace maild {
 class session : public std::enable_shared_from_this<session>
 {
 public:
-    session(boost::asio::io_service& io_service, const server_options& options);
+    session(boost::asio::io_service& io_service, const std::string& db_connection_string,
+            const std::string& domain_name);
     ~session() ;//= default;
     session ( const session& ) = delete;
     session ( session&& ) = delete;
@@ -51,7 +51,8 @@ private:
     void handle_complete_quit_command(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_auth_command(const std::string& command_param);
 private:
-    server_options options;  
+    std::string db_connection_string;
+    std::string domain_name;
     boost::asio::strand<boost::asio::io_context::executor_type> strand;
     boost::asio::ip::tcp::socket socket;
     boost::asio::streambuf response;
@@ -59,7 +60,6 @@ private:
     mail mail_message;
     std::chrono::time_point<std::chrono::steady_clock> session_start;
     std::map<std::string,std::unique_ptr<smtp_command>> commands;
-    static log4cxx::LoggerPtr logger;
 };
 
 typedef std::shared_ptr<session> session_ptr;

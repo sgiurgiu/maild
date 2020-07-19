@@ -9,7 +9,6 @@ namespace maild {
 struct options
 {
     std::string config_file;
-    std::string log_file;
     bool help=false;
     bool quiet=false;
     bool verbose=false;

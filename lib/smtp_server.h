@@ -3,12 +3,10 @@
 
 #include "mail.h"
 #include "session.h"
-#include "active_object.h"
 #include "server_options.h"
 #include <boost/system/error_code.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/io_service.hpp>
-#include <log4cxx/logger.h>
 #include <unordered_set>
 #include <functional>
 #include <thread>
@@ -21,7 +19,10 @@ namespace maild {
 class smtp_server
 {
 public:
-    smtp_server(boost::asio::io_service& io_service,const std::string& listen_address, const server_options& options);
+    smtp_server(boost::asio::io_service& io_service,
+                const std::string& db_connection_string,
+                const server& server_options,
+                const std::string& domain_name);
     ~smtp_server();
     smtp_server ( const smtp_server& ) = delete;
     smtp_server (smtp_server&& ) = delete;
@@ -41,10 +42,10 @@ private:
             return lhs.get()==rhs.get();
         }
     };    
-    server_options options;  
+    std::string db_connection_string;
+    std::string domain_name;
     boost::asio::io_service& io_service;
     boost::asio::ip::tcp::acceptor acceptor;            
-    static log4cxx::LoggerPtr logger;
 };
 }
 

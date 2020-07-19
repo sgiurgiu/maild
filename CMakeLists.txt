@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 SET(MAILD_VERSION_MAJOR "0")
 SET(MAILD_VERSION_MINOR "0")
-SET(MAILD_VERSION_PATCH "9")
+SET(MAILD_VERSION_PATCH "10")
 
 add_definitions(-DMAILD_VERSION="${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
 add_definitions(-DMAILD_STRING="MailD v${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
@@ -34,6 +34,9 @@ include(CMakePackageConfigHelpers)
 
 set(BEASTHTTP_DIR ${CMAKE_SOURCE_DIR}/external/beasthttp/BeastHttp)
 set(BEASTHTTP_INCLUDE ${BEASTHTTP_DIR}/include)
+add_subdirectory(external/fmt)
+add_subdirectory(external/spdlog)
+add_definitions(-DSPDLOG_FMT_EXTERNAL_HO -DSPDLOG_FMT_EXTERNAL)
 
 file(GLOB_RECURSE HEADERS *.h *.hpp *.hxx )
 add_custom_target(Headers SOURCES ${HEADERS})

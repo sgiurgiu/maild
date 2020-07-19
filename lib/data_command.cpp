@@ -6,8 +6,10 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/read_until.hpp>
 
+#include <spdlog/spdlog.h>
+
 namespace maild {
-log4cxx::LoggerPtr data_command::logger(log4cxx::Logger::getLogger("data_command"));
+
 data_command::data_command(boost::asio::ip::tcp::socket& socket,mail& mail_message):smtp_command(socket),
     mail_message(mail_message)
 {
@@ -30,7 +32,7 @@ void data_command::handle_data_written_command(complete_handler_t complete_handl
 {
     if(error)
     {
-        LOG4CXX_ERROR(logger, "Error reading data command "<<error.message());
+        spdlog::error("Error reading data command {}",error.message());
         return;
     }
     write_buffer.consume(bytes_transferred);
@@ -49,16 +51,16 @@ void data_command::handle_data_read_command(complete_handler_t complete_handler,
 {
     if(error)
     {
-        LOG4CXX_ERROR(logger, "Error reading data contents "<<error.message());
+        spdlog::error("Error reading data contents ",error.message());
         return;
     }
     if(bytes_transferred <= 6)
     {
-        LOG4CXX_ERROR(logger, "Error reading greeting, with "<<bytes_transferred<<" bytes transfered in handle_write_data_response");
+        spdlog::error( "Error reading greeting, with {} bytes transfered in handle_write_data_response",bytes_transferred);
         return;
     }
     std::string data(boost::asio::buffer_cast<const char*>(buffer.data()),bytes_transferred-5);
-    LOG4CXX_DEBUG(logger, "Got data "<<data);
+    spdlog::error( "Got data {}",data);
     mail_message.body = data;
     buffer.consume(bytes_transferred);
     std::ostream request_stream(&write_buffer);

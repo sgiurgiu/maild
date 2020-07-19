@@ -6,8 +6,7 @@ options_parser::options_parser()
 {
     visibleDescription.add_options()
     ("help,h","Get help using MAILD Web")
-    ("config,c",boost::program_options::value<std::string>()->default_value("maild_web.conf"),"Set the maild web configuration file location")
-    ("log,l",boost::program_options::value<std::string>()->default_value("log.properties"),"Set the maild web logging file location")    
+    ("config,c",boost::program_options::value<std::string>()->default_value("maild_web.conf"),"Set the maild web configuration file location")    
     ("quiet,q","be quiet")
     ("verbose,v","be verbose")
     ("daemon,D","go in the background")
@@ -35,12 +34,7 @@ options options_parser::parse_arguments(int argc,char** argv)
     if(vm.count("config")) {
         opt.config_file=vm["config"].as<std::string>();
     }
-    
-    if(vm.count("log")) {
-        opt.log_file=vm["log"].as<std::string>();
-    }
-
-    
+        
     return opt;
 }
 

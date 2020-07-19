@@ -1,9 +1,10 @@
 #include "quit_command.h"
 #include <ostream>
 #include <boost/asio/write.hpp>
+#include <spdlog/spdlog.h>
 
 namespace maild {
-log4cxx::LoggerPtr quit_command::logger(log4cxx::Logger::getLogger("quit_command"));
+
 
 quit_command::quit_command(boost::asio::ip::tcp::socket& socket):
     smtp_command(socket)

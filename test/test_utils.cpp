@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include <utils.h>
 
-#include <log4cxx/basicconfigurator.h>
 
 using namespace maild;
 using namespace std;
@@ -10,9 +9,7 @@ class UtilsTest : public ::testing::Test {
  protected:
   void SetUp() override
   {
-      log4cxx::BasicConfigurator::configure();
-      log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
-      logger->setLevel(log4cxx::Level::getDebug());
+
   }
 
   // void TearDown() override {}

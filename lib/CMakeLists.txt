@@ -6,7 +6,6 @@ set(Boost_USE_MULTITHREADED      ON)
 
 find_package(Boost 1.72 REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_library(LOG4CXX_LIBS log4cxx)
 find_library(PSQLCXX_LIBS pqxx)
 find_package(Tcmalloc)
 find_package(Threads)
@@ -49,9 +48,11 @@ add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})
 
 target_link_libraries(${LIBRARY_NAME} PUBLIC  ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(${LIBRARY_NAME} PUBLIC ${Boost_LIBRARIES} ${LOG4CXX_LIBS})
+target_link_libraries(${LIBRARY_NAME} PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${PSQLCXX_LIBS} ${PQ_LIB})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${MAGIC_LIB} ${MIMETIC_LIB})
+target_link_libraries(${LIBRARY_NAME} PRIVATE spdlog::spdlog_header_only fmt::fmt-header-only)
+
 
 if (Tcmalloc_FOUND)
     target_link_libraries(${LIBRARY_NAME} PUBLIC ${Tcmalloc_LIBRARIES})

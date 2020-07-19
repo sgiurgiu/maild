@@ -18,10 +18,10 @@
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/buffers_range.hpp>
 
+#include <spdlog/spdlog.h>
+
 using namespace maild;
 namespace beast = boost::beast;
-
-log4cxx::LoggerPtr web_server::logger(log4cxx::Logger::getLogger("web_server"));
 
 web_server::web_server(const web_options& options):options(options)
 {
@@ -38,7 +38,7 @@ void web_server::run()
     boost::asio::signal_set sig_set(ioc, SIGINT, SIGTERM);
 
     web_file_server file_server(options.get_files_dir());
-    LOG4CXX_DEBUG(logger, "DB connection string "<<options.get_db_connection_string());
+    spdlog::debug("DB connection string {}",options.get_db_connection_string());
     
 
     http::basic_router<http_session> router{std::regex::ECMAScript};
@@ -50,7 +50,7 @@ void web_server::run()
         web_api_server api_server(options.get_db_connection_string());
         auto id = std::get<0>(args);
         auto type = std::get<1>(args);
-        LOG4CXX_DEBUG(logger, "Retrieving mail for id "<<id<<" and type "<<type<<" for url:"<<request.target().to_string());
+        spdlog::debug("Retrieving mail for id {} and type {} for url: {}",id,type,request.target().to_string());
         context.send(api_server.get_mail(request,id,type));
     });
     using pack3 = http::param::pack<std::string>;
@@ -70,7 +70,7 @@ void web_server::run()
         rsp.result(boost::beast::http::status::not_found);
         rsp.version(request.version());
         rsp.set(boost::beast::http::field::server, MAILD_STRING);
-        LOG4CXX_INFO(logger, " Resource not found "<<request.target().to_string());
+        spdlog::info(" Resource not found {}",request.target().to_string());
         std::string contents = "Resource not found:"+request.target().to_string()+"\n";
         rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
         rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");

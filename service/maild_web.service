@@ -7,7 +7,7 @@ After=postgresql.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/maild_web -c /etc/maild/maild_web.conf -l /etc/maild/web_log.properties
+ExecStart=/usr/bin/maild_web -c /etc/maild/maild_web.conf
 User=maild
 Group=maild
 Restart=always

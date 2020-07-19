@@ -4,7 +4,7 @@
 #include <vector>
 #include <istream>
 #include <mimetic/mimetic.h>
-#include <log4cxx/logger.h>
+#include "toml.hpp"
 
 namespace maild {
     class utils final{
@@ -55,6 +55,7 @@ namespace maild {
             mimetic::MimeEntity me(in);                   
             return get_part(&me,types);            
         }
+        static void configure_logs(const toml::node_view<toml::node>& node);
     private:
         static std::string::size_type get_next_utf8_part(const std::string& subj, std::string& decodedString);
         static std::string get_part(mimetic::MimeEntity* me,const std::vector<std::string>& types, std::string boundary = "");
