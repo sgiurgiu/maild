@@ -25,7 +25,7 @@ check_mail_interval=60
         type="rotating_file"
         level="debug"
         pattern="[%D %T] [%l] %v"
-        file="/var/log/maild.log"
+        file="/var/log/maild/maild.log"
         max_size=10000000
         max_files=25
 

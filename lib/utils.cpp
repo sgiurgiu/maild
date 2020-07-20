@@ -30,6 +30,7 @@ void utils::configure_logs(const toml::node_view<toml::node>& logs_conf)
             auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(std::string(file_name),max_size,max_files);
             file->set_pattern(std::string(pattern));
             file->set_level(spdlog::level::from_str(std::string(level)));
+            sinks.push_back(file);
         }
     }
     std::shared_ptr<spdlog::logger> all_logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(),sinks.end());
