@@ -40,7 +40,10 @@ set(LIBMAILD_SRCS
         rcpt_command.cpp
         data_command.cpp
         quit_command.cpp
-        auth_command.cpp)
+        auth_command.cpp
+        rset_command.cpp
+        help_command.cpp
+        verify_command.cpp)
 
 set(LIBRARY_NAME "maillib")        
 add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})

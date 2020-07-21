@@ -20,7 +20,12 @@ void ehlo_command::execute(boost::asio::streambuf& buffer,complete_handler_t com
     std::ostream output(&write_buffer);
     output << "250-"<< domain_name <<" Hello " << line << "\r\n";
     output << "250-AUTH LOGIN PLAIN\r\n";
-    output << "250 SIZE 1000000\r\n";
+    output << "250-SIZE 1000000\r\n";
+    output << "250-HELP\r\n";
+    output << "250-RSET\r\n";
+    output << "250-NOOP\r\n";
+    output << "250 VRFY\r\n";
+
     boost::asio::async_write(socket,write_buffer,complete_handler);
 }
 

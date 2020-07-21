@@ -15,6 +15,9 @@
 #include "data_command.h"
 #include "quit_command.h"
 #include "auth_command.h"
+#include "rset_command.h"
+#include "help_command.h"
+#include "verify_command.h"
 
 #include <spdlog/spdlog.h>
 
@@ -33,6 +36,10 @@ session::session(boost::asio::io_context& io_context,
     commands["DATA"] = std::make_unique<data_command>(socket,mail_message);
     commands["QUIT"] = std::make_unique<quit_command>(socket);
     commands["AUTH"] = std::make_unique<auth_command>(socket);
+    commands["RSET"] = std::make_unique<rset_command>(socket);
+    commands["NOOP"] = std::make_unique<rset_command>(socket);
+    commands["HELP"] = std::make_unique<help_command>(socket);
+    commands["VRFY"] = std::make_unique<verify_command>(socket);
 }
 
 session::~session()

@@ -24,6 +24,10 @@ try:
     server.ehlo() # Can be omitted
     #server.starttls(context=context) # Secure the connection
     #server.ehlo() # Can be omitted
+    server.help()
+    server.rset()
+    server.verify("asd@asd.com")
+    server.noop()
     server.login(sender_email, password)    
     
     server.sendmail(sender_email, receiver_email, message.as_string())
