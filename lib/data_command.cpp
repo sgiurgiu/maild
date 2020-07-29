@@ -60,7 +60,7 @@ void data_command::handle_data_read_command(complete_handler_t complete_handler,
         return;
     }
     std::string data(boost::asio::buffer_cast<const char*>(buffer.data()),bytes_transferred-5);
-    spdlog::error( "Got data {}",data);
+    spdlog::debug( "Got data {}",data);
     mail_message.body = data;
     buffer.consume(bytes_transferred);
     std::ostream request_stream(&write_buffer);

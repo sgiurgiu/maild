@@ -18,8 +18,8 @@ void rcpt_command::execute(boost::asio::streambuf& buffer,complete_handler_t com
     std::istream input(&buffer);
     std::string line;
     std::getline(input,line);
-    mail_message.to = utils::get_mail_to(line);
-    spdlog::debug( "Got mail to: {}",mail_message.to);
+    mail_message.to.push_back(utils::get_mail_to(line));
+    spdlog::debug( "Got mail to: {}",mail_message.to.back());
     std::ostream output(&write_buffer);
     output << "250 Ok\r\n";
     boost::asio::async_write(socket,write_buffer,complete_handler);

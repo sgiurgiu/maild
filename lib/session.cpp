@@ -132,14 +132,19 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
     //save message
     if(mail_message.from.empty() || mail_message.to.empty() || mail_message.body.empty()) {
         spdlog::error( "Not saving message, stuff is empty");
+        spdlog::default_logger()->flush();
         return;
     }
     spdlog::debug( "Saving message");
     pqxx::connection db(db_connection_string);
-    db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");
-    std::string username = mail_message.to.substr(0,mail_message.to.find('@'));
+    db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");    
     pqxx::work w(db);
-    w.exec_prepared("new_mail",mail_message.from,mail_message.to,mail_message.body,
-        username);
+    for(const auto& to : mail_message.to)
+    {
+        std::string username = to.substr(0,to.find('@'));
+        w.exec_prepared("new_mail",mail_message.from,to,mail_message.body,
+            username);
+    }
     w.commit();
+    spdlog::default_logger()->flush();
 }

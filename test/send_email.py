@@ -8,7 +8,7 @@ from email.message import EmailMessage
 port = 2525  # For SSL
 password = "bla"
 sender_email = "my@gmail.com"
-receiver_email = "a@xvknp.com"
+receiver_email = ["a@xvknp.com","b@xvknp.com","c@xvknp.com"]
 
 message = EmailMessage();
 
@@ -30,7 +30,7 @@ try:
     server.noop()
     server.login(sender_email, password)    
     
-    server.sendmail(sender_email, receiver_email, message.as_string())
+    server.sendmail(sender_email, receiver_email, "ASDASD")
     
 except Exception as e:
     # Print any error messages to stdout
