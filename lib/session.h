@@ -13,12 +13,13 @@
 #include <string>
 #include <chrono>
 #include <map>
+#include <pqxx/connection>
 
 namespace maild {
 class session : public std::enable_shared_from_this<session>
 {
 public:
-    session(boost::asio::io_service& io_service, const std::string& db_connection_string,
+    session(boost::asio::io_service& io_service, pqxx::connection *db,
             const std::string& domain_name);
     ~session() ;//= default;
     session ( const session& ) = delete;
@@ -51,7 +52,7 @@ private:
     void handle_complete_quit_command(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_auth_command(const std::string& command_param);
 private:
-    std::string db_connection_string;
+    pqxx::connection *db;
     std::string domain_name;
     boost::asio::strand<boost::asio::io_context::executor_type> strand;
     boost::asio::ip::tcp::socket socket;

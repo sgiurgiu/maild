@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <atomic>
+#include <pqxx/connection>
 
 namespace maild {
 
@@ -20,7 +21,7 @@ class smtp_server
 {
 public:
     smtp_server(boost::asio::io_service& io_service,
-                const std::string& db_connection_string,
+                pqxx::connection *db,
                 const server& server_options,
                 const std::string& domain_name);
     ~smtp_server();
@@ -42,7 +43,7 @@ private:
             return lhs.get()==rhs.get();
         }
     };    
-    std::string db_connection_string;
+    pqxx::connection *db;
     std::string domain_name;
     boost::asio::io_service& io_service;
     boost::asio::ip::tcp::acceptor acceptor;            

@@ -1,7 +1,6 @@
 #include "server_manager.h"
 #include "smtp_server.h"
 #include <pqxx/transaction>
-#include <pqxx/connection>
 
 #include <vector>
 #include <memory>
@@ -16,8 +15,10 @@ using namespace maild;
 using boost::asio::ip::tcp;
 
 server_manager::server_manager(const server_options& options):options(options),
-    signals(io_context, SIGINT, SIGTERM)
+    signals(io_context, SIGINT, SIGTERM),
+    db(std::make_unique<pqxx::connection>(options.get_db_connection_string()))
 {    
+    prepare_database();
     start_cleanup_thread();
 }
 
@@ -31,22 +32,31 @@ server_manager::~server_manager()
     }
 }
 
+void server_manager::prepare_database()
+{
+    db->prepare("delete_mail","delete from mails where date_received <= NOW() - ('1 second'::interval * $1)");
+    db->prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");
+    //deadlock possible apparently. we're low load so we're fine
+    db->prepare("mail_count_increment","update counters set counter=counter+1 where id='mails_received'");
+    {
+       pqxx::work w(*db);
+       w.exec("create table if not exists counters (id varchar(50) primary key,counter bigint not null default 0)");
+       w.exec("insert into counters (id, counter) values ('mails_received',0) on conflict do nothing");
+       w.commit();
+    }
+}
+
 void server_manager::start_cleanup_thread()
 {
     if(cleanup_thread_created) return;
     cleanup_thread = std::thread([this](){
         try
         {
-            pqxx::connection db(options.get_db_connection_string());
-            std::string sql = "delete from mails where date_received <= NOW() - interval '";
-            sql+= std::to_string(options.get_keep_mail_seconds());
-            sql+=" seconds'";
-            spdlog::debug("Deletion sql {}",sql);
-            db.prepare("delete_mail",sql);
+
             while(!cleanup_done.load())
             {                
-                pqxx::work w(db);
-                pqxx::result result = w.exec_prepared("delete_mail");
+                pqxx::work w(*db);
+                pqxx::result result = w.exec_prepared("delete_mail",options.get_keep_mail_seconds());
                 w.commit();
                 if(!cleanup_done.load() && result.affected_rows() > 0)
                 {
@@ -81,7 +91,7 @@ void server_manager::run()
   for(const auto& server_info : options.get_servers())
   {
       if(!server_info.enabled) continue;
-      auto server = std::make_unique<smtp_server>(io_context,options.get_db_connection_string(),
+      auto server = std::make_unique<smtp_server>(io_context,db.get(),
                                                   server_info,options.get_domain_name());
       server->run();
       servers.push_back(std::move(server));

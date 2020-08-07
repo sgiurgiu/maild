@@ -5,8 +5,8 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <sstream>
-#include <pqxx/connection>
 #include <pqxx/transaction>
+
 
 #include "hello_command.h"
 #include "ehlo_command.h"
@@ -24,8 +24,8 @@
 using namespace maild;
 
 session::session(boost::asio::io_context& io_context,
-                 const std::string& db_connection_string,const std::string& domain_name)
-                : db_connection_string(db_connection_string),domain_name(domain_name),
+                 pqxx::connection *db,const std::string& domain_name)
+                : db(db),domain_name(domain_name),
                   strand(boost::asio::make_strand(io_context)), socket(strand),
                   session_start(std::chrono::steady_clock::now())
 {
@@ -128,7 +128,6 @@ void session::handle_parse_commands(const boost::system::error_code& error, std:
 
 void session::handle_complete_quit_command(const boost::system::error_code& /*error*/, std::size_t /*bytes_transferred*/)
 {
-
     //save message
     if(mail_message.from.empty() || mail_message.to.empty() || mail_message.body.empty()) {
         spdlog::error( "Not saving message, stuff is empty");
@@ -136,15 +135,14 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
         return;
     }
     spdlog::debug( "Saving message");
-    pqxx::connection db(db_connection_string);
-    db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");    
-    pqxx::work w(db);
+    pqxx::work w(*db);
     for(const auto& to : mail_message.to)
     {
         std::string username = to.substr(0,to.find('@'));
         w.exec_prepared("new_mail",mail_message.from,to,mail_message.body,
-            username);
+            username);        
     }
+    w.exec_prepared("mail_count_increment");
     w.commit();
     spdlog::default_logger()->flush();
 }

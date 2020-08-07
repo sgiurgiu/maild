@@ -8,6 +8,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <pqxx/connection>
 
 namespace maild {
 
@@ -17,11 +18,11 @@ public:
     server_manager(const server_options& options);
     server_manager();
     ~server_manager();
-    void set_options(const server_options& options);
     void run();
     void stop();
 private:
     void start_cleanup_thread();
+    void prepare_database();
 private:
     std::atomic_bool cleanup_done{false};
     bool cleanup_thread_created = false;
@@ -31,6 +32,7 @@ private:
     server_options options;    
     boost::asio::io_context io_context;
     boost::asio::signal_set signals;
+    std::unique_ptr<pqxx::connection> db;
 };
 
 }

@@ -10,9 +10,9 @@
 using namespace maild;
 using boost::asio::ip::tcp;
 
-smtp_server::smtp_server(boost::asio::io_service& io_service, const std::string& db_connection_string,
+smtp_server::smtp_server(boost::asio::io_service& io_service, pqxx::connection *db,
                          const server& server_options,const std::string& domain_name)
-    : db_connection_string(db_connection_string),domain_name(domain_name),
+    : db(db),domain_name(domain_name),
       io_service(io_service),acceptor(io_service)
 {
     tcp::endpoint endpoint(boost::asio::ip::address::from_string(server_options.ip),
@@ -35,7 +35,7 @@ void smtp_server::run()
 void smtp_server::start_accept()
 {
     spdlog::info( "Waiting for client...");
-    session_ptr new_session = std::make_shared<session>(io_service,db_connection_string,domain_name);
+    session_ptr new_session = std::make_shared<session>(io_service,db,domain_name);
     acceptor.async_accept(new_session->get_socket(),
                           boost::bind(&smtp_server::handle_accept,this,boost::asio::placeholders::error,
                                       new_session));
