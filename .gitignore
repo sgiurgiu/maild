@@ -4,4 +4,4 @@ build/
 .vscode/
 CMakeLists.txt.user
 logs/
-
+test/data/*.eml
