@@ -8,8 +8,8 @@ After=postgresql.service
 [Service]
 Type=simple
 ExecStart=/usr/bin/maild -c /etc/maild/maild.conf
-User=maild
-Group=maild
+User=root
+Group=root
 Restart=always
 
 [Install]
