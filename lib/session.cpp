@@ -141,10 +141,11 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
     try
     {
         pqxx::work w(*db);
+        pqxx::binarystring blob(mail_message.body);
         for(const auto& to : mail_message.to)
         {
-            std::string username = to.substr(0,to.find('@'));
-            w.exec_prepared("new_mail",mail_message.from,to,mail_message.body,
+            std::string username = to.substr(0,to.find('@'));            
+            w.exec_prepared("new_mail",mail_message.from,to,blob,
                 username);
         }
         w.exec_prepared("mail_count_increment");

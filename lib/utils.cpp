@@ -108,6 +108,7 @@ std::string utils::get_part(mimetic::MimeEntity* me,
     {
        boundary =  me->header().contentType().param("boundary");
     }
+    auto charset = me->header().contentType().param("charset");
     for(const auto& type : types)
     {
         if(subtype == type)

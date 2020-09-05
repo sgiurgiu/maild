@@ -32,12 +32,12 @@ web_api_server::response web_api_server::get_users_mails(const request& request,
     {
         const pqxx::row row = result[rownum];
         json mail_row = json::object();
-        std::string body_raw = row[2].as<std::string>();
+        pqxx::binarystring body_raw(row[2]);
         mail_row["from"] = row[0].as<std::string>();
         mail_row["to"] = row[1].as<std::string>();
         mail_row["date"] = row[3].as<std::string>();
         mail_row["id"] = row[4].as<int64_t>();
-        std::stringstream body_raw_stream(body_raw);        
+        std::stringstream body_raw_stream(body_raw.str());
         mail_row["subject"] = utils::get_subject(body_raw_stream);
         mails_array.push_back(mail_row);
     }
@@ -66,16 +66,16 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
             rsp.version(request.version());
             rsp.set(boost::beast::http::field::server, MAILD_STRING);
             
-            std::string body_raw = result[0][0].as<std::string>();
+            pqxx::binarystring body_raw (result[0][0]);
             if(type == "raw")
             {
-                rsp.set(boost::beast::http::field::content_length, std::to_string(body_raw.length()));
+                rsp.set(boost::beast::http::field::content_length, std::to_string(body_raw.size()));
                 rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");
-                rsp.body() = (body_raw);
+                rsp.body() = (body_raw.str());
             } 
             else if (type == "html")
             {
-                std::stringstream body_raw_stream(body_raw);
+                std::stringstream body_raw_stream(body_raw.str());
                 auto html = utils::get_part(body_raw_stream,{"html"});
                 rsp.set(boost::beast::http::field::content_length, std::to_string(html.length()));
                 rsp.set(boost::beast::http::field::content_type,"text/html; charset=UTF-8");
@@ -83,7 +83,7 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
             } 
             else if (type == "text")
             {
-                std::stringstream body_raw_stream(body_raw);
+                std::stringstream body_raw_stream(body_raw.str());
                 auto text = utils::get_part(body_raw_stream,{"text","plain"});
                 rsp.set(boost::beast::http::field::content_length, std::to_string(text.length()));
                 rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");

@@ -5,14 +5,14 @@ from email.mime.multipart import MIMEMultipart
 from email.parser import Parser
 from email.message import EmailMessage
 
-port = 2525  # For SSL
+port = 4587  # For SSL
 password = "bla"
 sender_email = "my@gmail.com"
 receiver_email = ["a@xvknp.com","b@xvknp.com","c@xvknp.com"]
 
 message = EmailMessage();
 
-with open('data/linkedin.eml') as fp:
+with open('data/travel_spam.eml') as fp:
     message = email.message_from_file(fp);
 
 
@@ -33,7 +33,9 @@ try:
     server.noop()    
     server.login(sender_email, password)    
     
-    server.sendmail(sender_email, receiver_email, "ASDASD")
+    #server.sendmail(sender_email, receiver_email, "ASDASD")
+    server.send_message(message)
+    
     
 except Exception as e:
     # Print any error messages to stdout
