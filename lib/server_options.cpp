@@ -37,6 +37,11 @@ void server_options::load(std::istream& conf_stream)
     spdlog::debug("keep_mail_seconds:",keep_mail_seconds);
     check_mail_interval_seconds = main_conf["check_mail_interval"].value_or(check_mail_interval_seconds);
     spdlog::debug("check_mail_interval_seconds: {} ",check_mail_interval_seconds);
+    auto certs = configuration["certificates"];
+    certificate_files.certificate_chain=certs["certificate_chain"].value_or("");
+    certificate_files.private_key=certs["private_key"].value_or("");
+    certificate_files.dh_file=certs["dh_file"].value_or("");
+
     auto servers_conf = configuration["servers"];
     for(const auto& server_conf : *servers_conf.as_table())
     {
@@ -51,7 +56,10 @@ void server_options::load(std::istream& conf_stream)
 
 }
 
-
+certificates server_options::get_certificates() const
+{
+    return certificate_files;
+}
 std::string server_options::get_db_connection_string() const
 {
   return db_connection_string;

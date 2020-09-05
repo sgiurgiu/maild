@@ -4,6 +4,11 @@ domain="xvknp.com"
 keep_mail=3600
 check_mail_interval=60
 
+[certificates]
+    certificate_chain="/etc/letsencrypt/live/xvknp.com/fullchain.pem"
+    private_key="/etc/letsencrypt/live/xvknp.com/privkey.pem"
+    dh_file="/etc/letsencrypt/ssl-dhparams.pem"
+
 [servers]
     [servers.plain]
         ip="0.0.0.0"

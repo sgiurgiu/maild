@@ -17,17 +17,20 @@ with open('data/linkedin.eml') as fp:
 
 
 # Create a secure SSL context
-context = ssl.create_default_context()
+context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+context.load_verify_locations('../conf/RootCA.crt')
+
 #/*, context=context*/
 try:
     server = smtplib.SMTP("localhost", port)
+    server.set_debuglevel(1)
     server.ehlo() # Can be omitted
-    #server.starttls(context=context) # Secure the connection
-    #server.ehlo() # Can be omitted
+    server.starttls(context=context) # Secure the connection
+    server.ehlo() # Can be omitted
     server.help()
     server.rset()
     server.verify("asd@asd.com")
-    server.noop()
+    server.noop()    
     server.login(sender_email, password)    
     
     server.sendmail(sender_email, receiver_email, "ASDASD")

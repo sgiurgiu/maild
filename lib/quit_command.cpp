@@ -6,7 +6,7 @@
 namespace maild {
 
 
-quit_command::quit_command(boost::asio::ip::tcp::socket& socket):
+quit_command::quit_command(maild_socket& socket):
     smtp_command(socket)
 {
 }
@@ -15,7 +15,7 @@ void quit_command::execute(boost::asio::streambuf& buffer,complete_handler_t com
     buffer.consume(buffer.size());
     std::ostream output(&write_buffer);
     output << "221 Bye\r\n";
-    boost::asio::async_write(socket,write_buffer,complete_handler);
+    socket.write(write_buffer,complete_handler);
 }
 
 } // namespace maild

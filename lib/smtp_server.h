@@ -23,7 +23,8 @@ public:
     smtp_server(boost::asio::io_service& io_service,
                 pqxx::connection *db,
                 const server& server_options,
-                const std::string& domain_name);
+                const std::string& domain_name,
+                const certificates& certificate_files);
     ~smtp_server();
     smtp_server ( const smtp_server& ) = delete;
     smtp_server (smtp_server&& ) = delete;
@@ -31,7 +32,6 @@ public:
     smtp_server& operator= (smtp_server&& ) = delete;
     void run();
 private:
-    void remove_session(session* s);
     void start_accept();
     void handle_accept(const boost::system::error_code& error,session_ptr new_session);
     void save_message(const mail& mail_message);
@@ -45,6 +45,7 @@ private:
     };    
     pqxx::connection *db;
     std::string domain_name;
+    certificates certificate_files;
     boost::asio::io_service& io_service;
     boost::asio::ip::tcp::acceptor acceptor;            
 };

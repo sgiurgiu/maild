@@ -8,7 +8,7 @@ namespace maild {
 class auth_command: public smtp_command
 {
 public:
-    auth_command(boost::asio::ip::tcp::socket& socket);
+    auth_command(maild_socket& socket);
     void execute(boost::asio::streambuf& buffer,complete_handler_t complete_handler) override;
 private:
     void write_plain_ok_response(boost::asio::streambuf& buffer,complete_handler_t complete_handler);

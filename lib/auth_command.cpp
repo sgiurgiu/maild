@@ -7,7 +7,7 @@
 #include <spdlog/spdlog.h>
 namespace maild {
 
-auth_command::auth_command(boost::asio::ip::tcp::socket& socket):
+auth_command::auth_command(maild_socket& socket):
     smtp_command(socket)
 {
 }
@@ -49,7 +49,7 @@ void auth_command::write_plain_ok_response(boost::asio::streambuf& buffer,comple
 {
     std::ostream output(&write_buffer);
     output <<  "334\r\n";
-    boost::asio::async_write(socket,write_buffer,[this,&buffer,complete_handler]
+    socket.write(write_buffer,[this,&buffer,complete_handler]
                              (const boost::system::error_code& error, size_t bytes_transferred){
         write_buffer.consume(bytes_transferred);
         if(!error)
@@ -60,7 +60,7 @@ void auth_command::write_plain_ok_response(boost::asio::streambuf& buffer,comple
 }
 void auth_command::read_plain_username_password_response(boost::asio::streambuf& buffer,complete_handler_t complete_handler)
 {
-    boost::asio::async_read_until(socket,buffer,"\r\n",[this,&buffer,complete_handler]
+    socket.read_until(buffer,"\r\n",[this,&buffer,complete_handler]
                                   (const boost::system::error_code& error, size_t bytes_transferred){
         buffer.consume(bytes_transferred);
         if(!error)
@@ -73,7 +73,7 @@ void auth_command::write_login_ask_for_password(boost::asio::streambuf& buffer,c
 {
     std::ostream output(&write_buffer);
     output <<  "334 UGFzc3dvcmQ6\r\n";
-    boost::asio::async_write(socket,write_buffer,[this,&buffer,complete_handler]
+    socket.write(write_buffer,[this,&buffer,complete_handler]
                              (const boost::system::error_code& error, size_t bytes_transferred){
         write_buffer.consume(bytes_transferred);
         if(!error)
@@ -84,7 +84,7 @@ void auth_command::write_login_ask_for_password(boost::asio::streambuf& buffer,c
 }
 void auth_command::read_login_password(boost::asio::streambuf& buffer,complete_handler_t complete_handler)
 {
-    boost::asio::async_read_until(socket,buffer,"\r\n",[this,&buffer,complete_handler]
+    socket.read_until(buffer,"\r\n",[this,&buffer,complete_handler]
                                   (const boost::system::error_code& error, size_t bytes_transferred){
         buffer.consume(bytes_transferred);
         if(!error)
@@ -97,7 +97,7 @@ void auth_command::write_login_ask_for_username(boost::asio::streambuf& buffer,c
 {
     std::ostream output(&write_buffer);
     output <<  "334 VXNlcm5hbWU6\r\n";
-    boost::asio::async_write(socket,write_buffer,[this,&buffer,complete_handler]
+    socket.write(write_buffer,[this,&buffer,complete_handler]
                              (const boost::system::error_code& error, size_t bytes_transferred){
         write_buffer.consume(bytes_transferred);
         if(!error)
@@ -108,7 +108,7 @@ void auth_command::write_login_ask_for_username(boost::asio::streambuf& buffer,c
 }
 void auth_command::read_login_username(boost::asio::streambuf& buffer,complete_handler_t complete_handler)
 {
-    boost::asio::async_read_until(socket,buffer,"\r\n",[this,&buffer,complete_handler]
+    socket.read_until(buffer,"\r\n",[this,&buffer,complete_handler]
                                   (const boost::system::error_code& error, size_t bytes_transferred){
         buffer.consume(bytes_transferred);
         if(!error)
@@ -122,7 +122,7 @@ void auth_command::write_authentication_successful(complete_handler_t complete_h
 {
     std::ostream output(&write_buffer);
     output << "235 2.7.0 Authentication successful\r\n";
-    boost::asio::async_write(socket,write_buffer,complete_handler);
+    socket.write(write_buffer,complete_handler);
 }
 
 } // namespace maild

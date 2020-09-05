@@ -6,7 +6,7 @@
 
 namespace maild {
 
-hello_command::hello_command(boost::asio::ip::tcp::socket& socket):
+hello_command::hello_command(maild_socket& socket):
     smtp_command(socket)
 {
 
@@ -20,7 +20,7 @@ void hello_command::execute(boost::asio::streambuf& buffer,complete_handler_t co
 
     std::ostream output(&write_buffer);
     output << "250 Hello " << line << ", glad to meet you\r\n";
-    boost::asio::async_write(socket,write_buffer,complete_handler);
+    socket.write(write_buffer,complete_handler);
 }
 
 } // namespace maild

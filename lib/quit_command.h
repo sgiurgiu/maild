@@ -8,7 +8,7 @@ namespace maild {
 class quit_command: public smtp_command
 {
 public:
-    quit_command(boost::asio::ip::tcp::socket& socket);
+    quit_command(maild_socket& socket);
     void execute(boost::asio::streambuf& buffer,complete_handler_t complete_handler) override;
 
 };

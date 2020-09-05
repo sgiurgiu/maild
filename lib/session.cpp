@@ -18,15 +18,17 @@
 #include "rset_command.h"
 #include "help_command.h"
 #include "verify_command.h"
+#include "starttls_command.h"
 
 #include <spdlog/spdlog.h>
 
 using namespace maild;
 
 session::session(boost::asio::io_context& io_context,
-                 pqxx::connection *db,const std::string& domain_name)
-                : db(db),domain_name(domain_name),
-                  strand(boost::asio::make_strand(io_context)), socket(strand),
+                 pqxx::connection *db,const std::string& domain_name,
+                 const certificates& certificate_files)
+                : db(db),domain_name(domain_name),strand(boost::asio::make_strand(io_context)),
+                  socket(strand,certificate_files),
                   session_start(std::chrono::steady_clock::now())
 {
     commands["HELO"] = std::make_unique<hello_command>(socket);
@@ -40,6 +42,7 @@ session::session(boost::asio::io_context& io_context,
     commands["NOOP"] = std::make_unique<rset_command>(socket);
     commands["HELP"] = std::make_unique<help_command>(socket);
     commands["VRFY"] = std::make_unique<verify_command>(socket);
+    commands["STARTTLS"] = std::make_unique<starttls_command>(socket,&commands);
 }
 
 session::~session()
@@ -49,7 +52,7 @@ session::~session()
 
 boost::asio::ip::tcp::socket& session::get_socket()
 {
-    return socket;
+    return socket.get_socket();
 }
 
 mail session::get_mail_message() const
@@ -67,9 +70,9 @@ void session::on_start()
     std::ostream request_stream(&request);
     std::string greeting_message = "220 "+domain_name+" ESMTP MailD ready";
     request_stream << greeting_message << "\r\n";
-    spdlog::debug("Starting session, writing {} socket open:{}",greeting_message,socket.is_open());
+    spdlog::debug("Starting session, writing {} socket open:{}",greeting_message,socket.is_open());    
 
-    boost::asio::async_write(socket,request,std::bind(&session::handle_read_commands,shared_from_this(),_1,_2));
+    socket.write(request,std::bind(&session::handle_read_commands,shared_from_this(),_1,_2));
 }
 
 void session::handle_read_commands(const boost::system::error_code& error, std::size_t bytes_transferred)
@@ -81,7 +84,7 @@ void session::handle_read_commands(const boost::system::error_code& error, std::
     }
     using namespace std::placeholders;
     request.consume(bytes_transferred);
-    boost::asio::async_read_until(socket,response,"\r\n",std::bind(&session::handle_parse_commands,shared_from_this(),_1,_2));
+    socket.read_until(response,"\r\n",std::bind(&session::handle_parse_commands,shared_from_this(),_1,_2));
 }
 void session::handle_parse_commands(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
@@ -122,7 +125,7 @@ void session::handle_parse_commands(const boost::system::error_code& error, std:
         response.consume(bytes_transferred);
         std::ostream request_stream(&request);
         request_stream << "502 Command not implemented\r\n";
-        boost::asio::async_write(socket,request,handle_read_commands_func);
+        socket.write(request,handle_read_commands_func);
     }
 }
 
@@ -135,14 +138,22 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
         return;
     }
     spdlog::debug( "Saving message");
-    pqxx::work w(*db);
-    for(const auto& to : mail_message.to)
+    try
     {
-        std::string username = to.substr(0,to.find('@'));
-        w.exec_prepared("new_mail",mail_message.from,to,mail_message.body,
-            username);        
+        pqxx::work w(*db);
+        for(const auto& to : mail_message.to)
+        {
+            std::string username = to.substr(0,to.find('@'));
+            w.exec_prepared("new_mail",mail_message.from,to,mail_message.body,
+                username);
+        }
+        w.exec_prepared("mail_count_increment");
+        w.commit();
     }
-    w.exec_prepared("mail_count_increment");
-    w.commit();
+    catch(const std::exception& ex)
+    {
+        spdlog::error("CANNOT SAVE MAIL: {}",ex.what());
+    }
+
     spdlog::default_logger()->flush();
 }

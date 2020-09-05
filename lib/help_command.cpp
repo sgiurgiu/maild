@@ -6,7 +6,7 @@
 namespace maild {
 
 
-help_command::help_command(boost::asio::ip::tcp::socket& socket):
+help_command::help_command(maild_socket& socket):
     smtp_command(socket)
 {
 
@@ -20,7 +20,7 @@ void help_command::execute(boost::asio::streambuf& buffer,complete_handler_t com
 
     std::ostream output(&write_buffer);
     output << "211 Help not implemented. Go check an RFC\r\n";
-    boost::asio::async_write(socket,write_buffer,complete_handler);
+    socket.write(write_buffer,complete_handler);
 }
 
 }//namespace maild

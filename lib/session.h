@@ -5,6 +5,8 @@
 #include "mail.h"
 #include "smtp_command.h"
 
+#include "maild_socket.h"
+
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
@@ -20,7 +22,7 @@ class session : public std::enable_shared_from_this<session>
 {
 public:
     session(boost::asio::io_service& io_service, pqxx::connection *db,
-            const std::string& domain_name);
+            const std::string& domain_name, const certificates& certificate_files);
     ~session() ;//= default;
     session ( const session& ) = delete;
     session ( session&& ) = delete;
@@ -55,7 +57,7 @@ private:
     pqxx::connection *db;
     std::string domain_name;
     boost::asio::strand<boost::asio::io_context::executor_type> strand;
-    boost::asio::ip::tcp::socket socket;
+    maild_socket socket;
     boost::asio::streambuf response;
     boost::asio::streambuf request; 
     mail mail_message;

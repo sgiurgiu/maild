@@ -9,7 +9,7 @@ namespace maild {
 class data_command: public smtp_command
 {
 public:
-    data_command(boost::asio::ip::tcp::socket& socket,mail& mail_message);
+    data_command(maild_socket& socket,mail& mail_message);
     void execute(boost::asio::streambuf& buffer,complete_handler_t complete_handler) override;
 
 private:

@@ -10,7 +10,7 @@
 
 namespace maild {
 
-data_command::data_command(boost::asio::ip::tcp::socket& socket,mail& mail_message):smtp_command(socket),
+data_command::data_command(maild_socket& socket,mail& mail_message):smtp_command(socket),
     mail_message(mail_message)
 {
 }
@@ -19,7 +19,7 @@ void data_command::execute(boost::asio::streambuf& buffer,complete_handler_t com
     buffer.consume(buffer.size());
     std::ostream output(&write_buffer);
     output << "354 End data with <CR><LF>.<CR><LF>\r\n";
-    boost::asio::async_write(socket,write_buffer,[this,&buffer,complete_handler]
+    socket.write(write_buffer,[this,&buffer,complete_handler]
                              (const boost::system::error_code& error,
                              std::size_t bytes_transferred){
         handle_data_written_command(complete_handler,buffer,error,bytes_transferred);
@@ -37,7 +37,7 @@ void data_command::handle_data_written_command(complete_handler_t complete_handl
     }
     write_buffer.consume(bytes_transferred);
 
-    boost::asio::async_read_until(socket,buffer,"\r\n.\r\n",[this,&buffer,complete_handler]
+    socket.read_until(buffer,"\r\n.\r\n",[this,&buffer,complete_handler]
                                   (const boost::system::error_code& error,
                                   std::size_t bytes_transferred){
         handle_data_read_command(complete_handler,buffer,error,bytes_transferred);
@@ -65,6 +65,6 @@ void data_command::handle_data_read_command(complete_handler_t complete_handler,
     buffer.consume(bytes_transferred);
     std::ostream request_stream(&write_buffer);
     request_stream << "250 Ok\r\n";
-    boost::asio::async_write(socket,write_buffer,complete_handler);
+    socket.write(write_buffer,complete_handler);
 }
 } // namespace maild

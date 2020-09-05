@@ -43,14 +43,15 @@ set(LIBMAILD_SRCS
         auth_command.cpp
         rset_command.cpp
         help_command.cpp
-        verify_command.cpp)
+        verify_command.cpp
+        starttls_command.cpp)
 
 set(LIBRARY_NAME "maillib")        
 add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})
 
 
 target_link_libraries(${LIBRARY_NAME} PUBLIC  ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(${LIBRARY_NAME} PUBLIC ${OPENSSL_CRYPTO_LIBRARY})
+target_link_libraries(${LIBRARY_NAME} PUBLIC OpenSSL::SSL)
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${PSQLCXX_LIBS} ${PQ_LIB})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${MAGIC_LIB} ${MIMETIC_LIB})

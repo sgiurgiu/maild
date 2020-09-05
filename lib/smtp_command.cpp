@@ -2,7 +2,7 @@
 
 namespace maild {
 
-smtp_command::smtp_command(boost::asio::ip::tcp::socket& socket):socket(socket)
+smtp_command::smtp_command(maild_socket& socket):socket(socket)
 {
 }
 smtp_command::~smtp_command()
