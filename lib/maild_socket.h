@@ -57,8 +57,8 @@ public:
             if(stream)
             {
                 stream->shutdown();
-            }
-            stream.reset();
+                stream.reset();
+            }            
         }
     }
     bool is_open() const

@@ -22,19 +22,19 @@ context.load_verify_locations('../conf/RootCA.crt')
 
 #/*, context=context*/
 try:
-    server = smtplib.SMTP("localhost", port)
+    server = smtplib.SMTP_SSL("localhost", port, context=context)
     server.set_debuglevel(1)
     server.ehlo() # Can be omitted
-    server.starttls(context=context) # Secure the connection
-    server.ehlo() # Can be omitted
+   # server.starttls(context=context) # Secure the connection
+   # server.ehlo() # Can be omitted
     server.help()
     server.rset()
     server.verify("asd@asd.com")
     server.noop()    
     server.login(sender_email, password)    
     
-    #server.sendmail(sender_email, receiver_email, "ASDASD")
-    server.send_message(message)
+    server.sendmail(sender_email, receiver_email, "ASDASD")
+    #server.send_message(message)
     
     
 except Exception as e:

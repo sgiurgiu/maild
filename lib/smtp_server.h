@@ -47,7 +47,8 @@ private:
     std::string domain_name;
     certificates certificate_files;
     boost::asio::io_service& io_service;
-    boost::asio::ip::tcp::acceptor acceptor;            
+    boost::asio::ip::tcp::acceptor acceptor;
+    server server_options;
 };
 }
 

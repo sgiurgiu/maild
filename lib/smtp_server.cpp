@@ -14,7 +14,7 @@ smtp_server::smtp_server(boost::asio::io_service& io_service, pqxx::connection *
                          const server& server_options,const std::string& domain_name,
                          const certificates& certificate_files)
     : db(db),domain_name(domain_name),certificate_files(certificate_files),
-      io_service(io_service),acceptor(io_service)
+      io_service(io_service),acceptor(io_service),server_options(server_options)
 {
     tcp::endpoint endpoint(boost::asio::ip::address::from_string(server_options.ip),
                            server_options.port);
@@ -22,7 +22,8 @@ smtp_server::smtp_server(boost::asio::io_service& io_service, pqxx::connection *
    acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
    acceptor.bind(endpoint);
    acceptor.listen();
-   spdlog::info("Starting to accept connections on address {} and port {}",server_options.ip,server_options.port);
+   spdlog::info("Starting to accept connections on address {} and port {} and we're fully ssl {}",
+                server_options.ip,server_options.port,server_options.ssl);
 }
 
 smtp_server::~smtp_server()
@@ -36,7 +37,8 @@ void smtp_server::run()
 void smtp_server::start_accept()
 {
     spdlog::info( "Waiting for client...");
-    session_ptr new_session = std::make_shared<session>(io_service,db,domain_name,certificate_files);
+    session_ptr new_session = std::make_shared<session>(io_service,db,domain_name,
+                                                        certificate_files,server_options.ssl);
     acceptor.async_accept(new_session->get_socket(),
                           boost::bind(&smtp_server::handle_accept,this,boost::asio::placeholders::error,
                                       new_session));
@@ -46,7 +48,8 @@ void smtp_server::handle_accept(const boost::system::error_code& error,session_p
 {    
     if(!error)
     {    
-        spdlog::info( "Got new client connection, starting session");
+        spdlog::info( "Got new client connection on port {}, and fully ssl: {}, starting session",
+                      server_options.port,server_options.ssl);
         new_session->start();
 
         start_accept();

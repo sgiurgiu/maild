@@ -26,10 +26,10 @@ using namespace maild;
 
 session::session(boost::asio::io_context& io_context,
                  pqxx::connection *db,const std::string& domain_name,
-                 const certificates& certificate_files)
+                 const certificates& certificate_files, bool is_fully_ssl)
                 : db(db),domain_name(domain_name),strand(boost::asio::make_strand(io_context)),
                   socket(strand,certificate_files),
-                  session_start(std::chrono::steady_clock::now())
+                  session_start(std::chrono::steady_clock::now()),is_fully_ssl(is_fully_ssl)
 {
     commands["HELO"] = std::make_unique<hello_command>(socket);
     commands["EHLO"] = std::make_unique<ehlo_command>(socket,domain_name);
@@ -61,6 +61,12 @@ mail session::get_mail_message() const
 }
 void session::start()
 {
+    socket.set_ssl(is_fully_ssl);
+    if(is_fully_ssl)
+    {
+        commands.erase("STARTTLS");//we no longer have that command
+        reinterpret_cast<ehlo_command*>(commands["EHLO"].get())->set_starttls_enabled(false);
+    }
     on_start();
 }
 void session::on_start()
@@ -70,7 +76,8 @@ void session::on_start()
     std::ostream request_stream(&request);
     std::string greeting_message = "220 "+domain_name+" ESMTP MailD ready";
     request_stream << greeting_message << "\r\n";
-    spdlog::debug("Starting session, writing {} socket open:{}",greeting_message,socket.is_open());    
+    spdlog::debug("Starting session, writing {} socket open:{}, fully ssl:{}",
+                  greeting_message,socket.is_open(),is_fully_ssl);
 
     socket.write(request,std::bind(&session::handle_read_commands,shared_from_this(),_1,_2));
 }

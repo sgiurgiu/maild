@@ -22,7 +22,8 @@ class session : public std::enable_shared_from_this<session>
 {
 public:
     session(boost::asio::io_service& io_service, pqxx::connection *db,
-            const std::string& domain_name, const certificates& certificate_files);
+            const std::string& domain_name, const certificates& certificate_files,
+            bool is_fully_ssl);
     ~session() ;//= default;
     session ( const session& ) = delete;
     session ( session&& ) = delete;
@@ -63,6 +64,7 @@ private:
     mail mail_message;
     std::chrono::time_point<std::chrono::steady_clock> session_start;
     std::map<std::string,std::unique_ptr<smtp_command>> commands;
+    bool is_fully_ssl;
 };
 
 typedef std::shared_ptr<session> session_ptr;
