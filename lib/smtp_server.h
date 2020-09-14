@@ -21,7 +21,7 @@ class smtp_server
 {
 public:
     smtp_server(boost::asio::io_service& io_service,
-                pqxx::connection *db,
+                const std::string& db_connection_string,
                 const server& server_options,
                 const std::string& domain_name,
                 const certificates& certificate_files);
@@ -43,7 +43,7 @@ private:
             return lhs.get()==rhs.get();
         }
     };    
-    pqxx::connection *db;
+    std::unique_ptr<pqxx::connection> db;
     std::string domain_name;
     certificates certificate_files;
     boost::asio::io_service& io_service;

@@ -67,6 +67,7 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
             rsp.set(boost::beast::http::field::server, MAILD_STRING);
             
             pqxx::binarystring body_raw (result[0][0]);
+            std::stringstream body_raw_stream(body_raw.str());
             if(type == "raw")
             {
                 rsp.set(boost::beast::http::field::content_length, std::to_string(body_raw.size()));
@@ -75,7 +76,6 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
             } 
             else if (type == "html")
             {
-                std::stringstream body_raw_stream(body_raw.str());
                 auto html = utils::get_part(body_raw_stream,{"html"});
                 rsp.set(boost::beast::http::field::content_length, std::to_string(html.length()));
                 rsp.set(boost::beast::http::field::content_type,"text/html; charset=UTF-8");
@@ -83,7 +83,6 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
             } 
             else if (type == "text")
             {
-                std::stringstream body_raw_stream(body_raw.str());
                 auto text = utils::get_part(body_raw_stream,{"text","plain"});
                 rsp.set(boost::beast::http::field::content_length, std::to_string(text.length()));
                 rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");

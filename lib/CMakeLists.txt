@@ -25,7 +25,6 @@ set(LIBMAILD_SRCS
         server_options.cpp 
         server_manager.cpp 
         session.cpp 
-        active_object.cpp
         web_options.cpp
         web_server.cpp
         web_file_server.cpp

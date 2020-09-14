@@ -19,7 +19,7 @@ void verify_command::execute(boost::asio::streambuf& buffer,complete_handler_t c
     spdlog::debug("Got verify command for mail : {}",line);
 
     std::ostream output(&write_buffer);
-    output << "250 Ok\r\n"; //we verify everyone
+    output << "250 Ok\r\n"; //we just return Ok.
     socket.write(write_buffer,complete_handler);
 }
 

@@ -34,7 +34,6 @@ void web_server::run()
     using http_listener = http::reactor::_default::listener_type;
 
     boost::asio::io_context ioc;
-    boost::asio::posix::stream_descriptor out{ioc, ::dup(STDERR_FILENO)};
     boost::asio::signal_set sig_set(ioc, SIGINT, SIGTERM);
 
     web_file_server file_server(options.get_files_dir());
@@ -81,9 +80,9 @@ void web_server::run()
     });
 
     // Error and warning handler
-    const auto& onError = [&ioc,&out](auto system_error_code, auto from) {
-        http::out::prefix::version::time::pushn<std::ostream>(
-                    out, "From:", from, "Info:", system_error_code.message());
+    const auto& onError = [&ioc](auto system_error_code, auto from) {
+
+        spdlog::error("From: {}, Info: {}",std::string(from),system_error_code.message());
 
         // I/O context will be stopped, if code value is EADDRINUSE or EACCES
         if (system_error_code == boost::system::errc::address_in_use or
@@ -94,26 +93,23 @@ void web_server::run()
     // Handler incoming connections
     const auto& onAccept = [&](auto asio_socket) {
         auto endpoint = asio_socket.remote_endpoint();
-        http::out::prefix::version::time::pushn<std::ostream>(
-                    out, endpoint.address().to_string() + ':' + std::to_string(endpoint.port()), "connected!");
+        spdlog::debug("{}:{} connected!",endpoint.address().to_string(),endpoint.port());
 
         // Start receive HTTP request
         http_session::recv(std::move(asio_socket), router, onError);
     };
 
-    auto const address = boost::asio::ip::address_v4::any();
-    auto const port = static_cast<unsigned short>(8080);
+    auto const address = boost::asio::ip::address_v4::loopback();
+    auto const port = static_cast<unsigned short>(options.get_port());
 
-    http::out::prefix::version::time::pushn<std::ostream>(
-                out, "Start accepting on", address.to_string() + ':' + std::to_string(port));
+    spdlog::debug("Start accepting on {}:{}",address.to_string(),port);
 
     // Start accepting
     http_listener::launch(ioc, {address, port}, onAccept, onError);
 
     // Capture SIGINT and SIGTERM to perform a clean shutdown
     sig_set.async_wait([&](boost::system::error_code const&, int sig) {
-        http::out::prefix::version::time::pushn<std::ostream>(
-                    out, "Capture", sig == SIGINT ? "SIGINT." : "SIGTERM.", "Stop!");
+        spdlog::info("Capture {}. Stop!",sig == SIGINT ? "SIGINT" : "SIGTERM");
         ioc.stop();
     });
 

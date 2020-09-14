@@ -91,7 +91,7 @@ void server_manager::run()
   for(const auto& server_info : options.get_servers())
   {
       if(!server_info.enabled) continue;
-      auto server = std::make_unique<smtp_server>(io_context,db.get(),
+      auto server = std::make_unique<smtp_server>(io_context,options.get_db_connection_string(),
                                                   server_info,options.get_domain_name(),
                                                   options.get_certificates());
       server->run();

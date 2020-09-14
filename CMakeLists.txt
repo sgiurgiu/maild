@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 SET(MAILD_VERSION_MAJOR "0")
 SET(MAILD_VERSION_MINOR "1")
-SET(MAILD_VERSION_PATCH "2")
+SET(MAILD_VERSION_PATCH "3")
 
 add_definitions(-DMAILD_VERSION="${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
 add_definitions(-DMAILD_STRING="MailD v${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
@@ -67,18 +67,8 @@ install(DIRECTORY "www/"
 
 install(FILES "conf/maild.conf.sample"
   DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild")
-
-install(FILES "conf/log.properties.sample"
-  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild")
   
 install(FILES "conf/maild_web.conf.sample"
-  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild"
-  )
-
-install(FILES "conf/log.properties.sample"
-  DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild"
-  )
-install(FILES "conf/web_log.properties.sample"
   DESTINATION "/${CMAKE_INSTALL_SYSCONFDIR}/maild"
   )
 
