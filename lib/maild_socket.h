@@ -46,7 +46,7 @@ public:
             stream->handshake(boost::asio::ssl::stream_base::server, ec);
             if(ec.failed())
             {
-                spdlog::error("SSL Handshacke failed: {}",ec.message());
+                spdlog::error("SSL Handshake failed: {}",ec.message());
                 //we'll just go on like nothing happened
                 ssl = false;
                 stream.reset();

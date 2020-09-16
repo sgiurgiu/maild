@@ -35,9 +35,6 @@ server_manager::~server_manager()
 void server_manager::prepare_database()
 {
     db->prepare("delete_mail","delete from mails where date_received <= NOW() - ('1 second'::interval * $1)");
-    db->prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");
-    //deadlock possible apparently. we're low load so we're fine
-    db->prepare("mail_count_increment","update counters set counter=counter+1 where id='mails_received'");
     {
        pqxx::work w(*db);
        w.exec("create table if not exists counters (id varchar(50) primary key,counter bigint not null default 0)");
@@ -106,10 +103,11 @@ void server_manager::run()
   num_threads = num_threads > 0 ? num_threads : 1;
   std::vector<std::thread> v;
   v.reserve(num_threads);
+  using run_function = boost::asio::io_context::count_type(boost::asio::io_service::*)();
   for(size_t i =0;i<num_threads;i++) {
-      v.emplace_back([this](){
-          io_context.run();
-      });
+      v.emplace_back(std::thread(std::bind(
+                                     static_cast<run_function>(&boost::asio::io_context::run)
+                                     ,&io_context)));
   }
 
   for(size_t i =0;i<num_threads;i++) {
