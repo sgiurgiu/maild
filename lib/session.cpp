@@ -139,19 +139,18 @@ void session::handle_parse_commands(const boost::system::error_code& error, std:
 void session::handle_complete_quit_command(const boost::system::error_code& /*error*/, std::size_t /*bytes_transferred*/)
 {
     //save message
-    if(mail_message.from.empty() || mail_message.to.empty() || mail_message.body.empty()) {
-        spdlog::error( "Not saving message, stuff is empty");
-        spdlog::default_logger()->flush();
-        return;
-    }
     spdlog::debug( "Saving message");
     try
     {
         pqxx::work w(*db);
         pqxx::binarystring blob(mail_message.body);
         for(const auto& to : mail_message.to)
-        {
-            std::string username = to.substr(0,to.find('@'));            
+        {            
+            std::string username = "";
+            auto at_index = to.find('@');
+            if(at_index != to.npos) {
+                username = to.substr(0,at_index);
+            }
             w.exec_prepared("new_mail",mail_message.from,to,blob,
                 username);
         }
