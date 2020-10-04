@@ -36,6 +36,16 @@ public:
             return sock;
         }
     }
+    void close()
+    {
+        boost::system::error_code ignored_ec;
+        if(ssl && stream)
+        {
+            stream->shutdown(ignored_ec);
+            stream.reset();
+        }
+        sock.close(ignored_ec);
+    }
     void set_ssl(bool ssl_flag)
     {
         ssl = ssl_flag;

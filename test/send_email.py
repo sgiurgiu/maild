@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.parser import Parser
 from email.message import EmailMessage
+import time
 
 port = 4587  # For SSL
 password = "bla"
@@ -27,6 +28,7 @@ try:
     server.ehlo() # Can be omitted
    # server.starttls(context=context) # Secure the connection
    # server.ehlo() # Can be omitted
+   # time.sleep(60*6)
     server.help()
     server.rset()
     server.verify("asd@asd.com")

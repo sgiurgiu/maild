@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <pqxx/transaction>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 
 
 #include "hello_command.h"
@@ -29,7 +31,8 @@ session::session(boost::asio::io_context& io_context,
                  const certificates& certificate_files, bool is_fully_ssl)
                 : db(db),domain_name(domain_name),strand(boost::asio::make_strand(io_context)),
                   socket(strand,certificate_files),
-                  session_start(std::chrono::steady_clock::now()),is_fully_ssl(is_fully_ssl)
+                  session_start(std::chrono::steady_clock::now()),is_fully_ssl(is_fully_ssl),
+                  timer(io_context)
 {
     commands["HELO"] = std::make_unique<hello_command>(socket);
     commands["EHLO"] = std::make_unique<ehlo_command>(socket,domain_name);
@@ -43,6 +46,8 @@ session::session(boost::asio::io_context& io_context,
     commands["HELP"] = std::make_unique<help_command>(socket);
     commands["VRFY"] = std::make_unique<verify_command>(socket);
     commands["STARTTLS"] = std::make_unique<starttls_command>(socket,&commands);
+    timer.expires_at(boost::posix_time::pos_infin);
+    check_socket_close_timer();
 }
 
 session::~session()
@@ -61,6 +66,7 @@ mail session::get_mail_message() const
 }
 void session::start()
 {
+    timer.expires_from_now(boost::posix_time::minutes(5));
     socket.set_ssl(is_fully_ssl);
     if(is_fully_ssl)
     {
@@ -163,4 +169,17 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
     }
 
     spdlog::default_logger()->flush();
+}
+
+void session::check_socket_close_timer()
+{
+    if (timer.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+    {
+      socket.close();
+    }
+    else
+    {
+        // Put the actor back to sleep.
+        timer.async_wait(bind(&session::check_socket_close_timer, this));
+    }
 }

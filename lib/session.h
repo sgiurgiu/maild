@@ -11,6 +11,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/asio/deadline_timer.hpp>
 #include <memory>
 #include <string>
 #include <chrono>
@@ -54,6 +55,7 @@ private:
     void handle_write_data_response(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_complete_quit_command(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_auth_command(const std::string& command_param);
+    void check_socket_close_timer();
 private:
     pqxx::connection *db;
     std::string domain_name;
@@ -65,6 +67,7 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> session_start;
     std::map<std::string,std::unique_ptr<smtp_command>> commands;
     bool is_fully_ssl;
+    boost::asio::deadline_timer timer;
 };
 
 typedef std::shared_ptr<session> session_ptr;
