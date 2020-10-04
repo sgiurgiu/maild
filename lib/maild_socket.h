@@ -16,7 +16,7 @@ class maild_socket
 public:
     maild_socket(boost::asio::strand<boost::asio::io_context::executor_type>& strand,
                  const certificates& certificate_files):
-        sock(strand),ssl_context(boost::asio::ssl::context::sslv23)
+        sock(strand),ssl_context(boost::asio::ssl::context::sslv23_server)
     {
         ssl_context.set_options(boost::asio::ssl::context::default_workarounds
                                 | boost::asio::ssl::context::single_dh_use);
@@ -43,13 +43,18 @@ public:
         {
             stream = std::make_unique<ssl_stream>(sock,ssl_context);
             boost::system::error_code ec;
+            spdlog::debug("Preparing for ssl handshake");
             stream->handshake(boost::asio::ssl::stream_base::server, ec);
             if(ec.failed())
             {
                 spdlog::error("SSL Handshake failed: {}",ec.message());
-                //we'll just go on like nothing happened
                 ssl = false;
                 stream.reset();
+                sock.close(ec);
+            }
+            else
+            {
+                spdlog::info("ssl handshake succeeded");
             }
         }
         else
@@ -60,6 +65,7 @@ public:
                 stream.reset();
             }            
         }
+        spdlog::default_logger()->flush();
     }
     bool is_open() const
     {
