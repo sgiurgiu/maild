@@ -42,8 +42,8 @@ private:
         {            
             return lhs.get()==rhs.get();
         }
-    };    
-    std::unique_ptr<pqxx::connection> db;
+    };
+    std::string db_connection_string;
     std::string domain_name;
     certificates certificate_files;
     boost::asio::io_service& io_service;

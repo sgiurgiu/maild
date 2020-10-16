@@ -5,6 +5,9 @@ from email.mime.multipart import MIMEMultipart
 from email.parser import Parser
 from email.message import EmailMessage
 import time
+import threading
+import random
+
 
 port = 4587  # For SSL
 password = "bla"
@@ -18,29 +21,74 @@ with open('data/travel_spam.eml') as fp:
 
 
 # Create a secure SSL context
-context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-context.load_verify_locations('../conf/RootCA.crt')
 
 #/*, context=context*/
-try:
-    server = smtplib.SMTP_SSL("localhost", port, context=context)
-    server.set_debuglevel(1)
-    server.ehlo() # Can be omitted
-   # server.starttls(context=context) # Secure the connection
-   # server.ehlo() # Can be omitted
-   # time.sleep(60*6)
-    server.help()
-    server.rset()
-    server.verify("asd@asd.com")
-    server.noop()    
-    server.login(sender_email, password)    
+def send_email():    
+    try:
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context.load_verify_locations('../conf/RootCA.crt')
+        server = smtplib.SMTP("localhost", 2525)
+        server.set_debuglevel(1)
+        server.ehlo() # Can be omitted
+        server.starttls(context=context) # Secure the connection
+    # server.ehlo() # Can be omitted
+    # time.sleep(60*6)
+        server.help()
+        server.rset()
+        server.verify("asd@asd.com")
+        server.noop()    
+        server.login(sender_email, password)    
+        
+        server.sendmail(sender_email, receiver_email, "ASDASD")
+        #server.send_message(message)
+        
+        
+    except Exception as e:
+        # Print any error messages to stdout
+        print(e)
+    finally:
+        server.quit() 
+
+def send_email_ssl():    
+    try:
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context.load_verify_locations('../conf/RootCA.crt')        
+        server = smtplib.SMTP_SSL("localhost", port, context=context)
+        server.set_debuglevel(1)
+        server.ehlo() # Can be omitted
+    # server.starttls(context=context) # Secure the connection
+    # server.ehlo() # Can be omitted
+    # time.sleep(60*6)
+        dd = random.randrange(10)
+        if dd == 5:
+            time.sleep(60*6)
+            
+        server.help()
+        server.rset()
+        server.verify("asd@asd.com")
+        server.noop()    
+        server.login(sender_email, password)    
+        
+        server.sendmail(sender_email, receiver_email, "ASDASD")
+        #server.send_message(message)
+        
+        
+    except Exception as e:
+        # Print any error messages to stdout
+        print(e)
+    finally:
+        server.quit() 
+
+threads = list()
+for i in range(10):
+    x = threading.Thread(target=send_email_ssl);
+    threads.append(x)
+    x.start()
     
-    server.sendmail(sender_email, receiver_email, "ASDASD")
-    #server.send_message(message)
+for i in range(10):
+    x = threading.Thread(target=send_email);
+    threads.append(x)
+    x.start()
     
-    
-except Exception as e:
-    # Print any error messages to stdout
-    print(e)
-finally:
-    server.quit() 
+for t in threads:
+    t.join()

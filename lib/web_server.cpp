@@ -53,7 +53,7 @@ void web_server::run()
         context.send(api_server.get_mail(request,id,type));
     });
     using pack3 = http::param::pack<std::string>;
-    router.param<pack3>().get("/api/mails/(\\w+)",
+    router.param<pack3>().get(R"(^/api/mails/(.+))",
                               [this](auto request, auto context, auto args) {
         web_api_server api_server(options.get_db_connection_string());
         context.send(api_server.get_users_mails(request,std::get<0>(args)));

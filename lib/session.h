@@ -11,7 +11,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/streambuf.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <memory>
 #include <string>
 #include <chrono>
@@ -22,7 +22,7 @@ namespace maild {
 class session : public std::enable_shared_from_this<session>
 {
 public:
-    session(boost::asio::io_service& io_service, pqxx::connection *db,
+    session(boost::asio::io_service& io_service, const std::string& db_connection_string,
             const std::string& domain_name, const certificates& certificate_files,
             bool is_fully_ssl);
     ~session() ;//= default;
@@ -55,9 +55,9 @@ private:
     void handle_write_data_response(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_complete_quit_command(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_auth_command(const std::string& command_param);
-    void check_socket_close_timer();
+    void close_socket_timeout(const boost::system::error_code& error);
 private:
-    pqxx::connection *db;
+    std::string db_connection_string;
     std::string domain_name;
     boost::asio::strand<boost::asio::io_context::executor_type> strand;
     maild_socket socket;
@@ -67,7 +67,7 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> session_start;
     std::map<std::string,std::unique_ptr<smtp_command>> commands;
     bool is_fully_ssl;
-    boost::asio::deadline_timer timer;
+    boost::asio::steady_timer timer;
 };
 
 typedef std::shared_ptr<session> session_ptr;

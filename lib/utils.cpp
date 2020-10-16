@@ -31,12 +31,19 @@ void utils::configure_logs(const toml::node_view<toml::node>& logs_conf)
             file->set_pattern(std::string(pattern));
             file->set_level(spdlog::level::from_str(std::string(level)));
             sinks.push_back(file);
-        }
+        }       
     }
     std::shared_ptr<spdlog::logger> all_logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(),sinks.end());
     all_logger->set_level(spdlog::level::trace);
     spdlog::register_logger(all_logger);
     spdlog::set_default_logger(all_logger);
+    for(const auto& sink:all_logger->sinks())
+    {
+        if(sink->level() <= spdlog::level::debug)
+        {
+            spdlog::flush_on(spdlog::level::debug);
+        }
+    }
 }
 
 std::string::size_type utils::get_next_utf8_part(const std::string& subj,std::string& decodedString)

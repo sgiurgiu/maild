@@ -6,9 +6,6 @@
 #include <iostream>
 #include <sstream>
 #include <pqxx/transaction>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-
 
 #include "hello_command.h"
 #include "ehlo_command.h"
@@ -27,10 +24,10 @@
 using namespace maild;
 
 session::session(boost::asio::io_context& io_context,
-                 pqxx::connection *db,const std::string& domain_name,
+                 const std::string& db_connection_string,const std::string& domain_name,
                  const certificates& certificate_files, bool is_fully_ssl)
-                : db(db),domain_name(domain_name),strand(boost::asio::make_strand(io_context)),
-                  socket(strand,certificate_files),
+                : db_connection_string(db_connection_string),domain_name(domain_name),
+                  strand(boost::asio::make_strand(io_context)), socket(strand,certificate_files),
                   session_start(std::chrono::steady_clock::now()),is_fully_ssl(is_fully_ssl),
                   timer(io_context)
 {
@@ -45,14 +42,13 @@ session::session(boost::asio::io_context& io_context,
     commands["NOOP"] = std::make_unique<rset_command>(socket);
     commands["HELP"] = std::make_unique<help_command>(socket);
     commands["VRFY"] = std::make_unique<verify_command>(socket);
-    commands["STARTTLS"] = std::make_unique<starttls_command>(socket,&commands);
-    timer.expires_at(boost::posix_time::pos_infin);
-    check_socket_close_timer();
+    commands["STARTTLS"] = std::make_unique<starttls_command>(socket,&commands);    
 }
 
 session::~session()
 {
     spdlog::debug("Deleting session");
+    spdlog::default_logger()->flush();
 }
 
 boost::asio::ip::tcp::socket& session::get_socket()
@@ -66,7 +62,9 @@ mail session::get_mail_message() const
 }
 void session::start()
 {
-    timer.expires_from_now(boost::posix_time::minutes(5));
+    timer.expires_after(std::chrono::minutes(1));
+    timer.async_wait(std::bind(&session::close_socket_timeout,this,std::placeholders::_1));
+
     socket.set_ssl(is_fully_ssl);
     if(is_fully_ssl)
     {
@@ -148,7 +146,11 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
     spdlog::debug( "Saving message");
     try
     {
-        pqxx::work w(*db);
+        pqxx::connection db(db_connection_string);
+        db.prepare("new_mail","insert into mails(from_address,to_address,body,date_received,username) values ($1,$2,$3,NOW(),$4)");
+        //deadlock possible apparently. we're low load so we're fine
+        db.prepare("mail_count_increment","update counters set counter=counter+1 where id='mails_received'");
+        pqxx::work w(db);
         pqxx::binarystring blob(mail_message.body);
         for(const auto& to : mail_message.to)
         {            
@@ -171,15 +173,15 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
     spdlog::default_logger()->flush();
 }
 
-void session::check_socket_close_timer()
-{
-    if (timer.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+void session::close_socket_timeout(const boost::system::error_code& error)
+{    
+    if(!error)
     {
-      socket.close();
+        spdlog::debug("Closing socket. Timer expired");
+        socket.close();
     }
     else
     {
-        // Put the actor back to sleep.
-        timer.async_wait(bind(&session::check_socket_close_timer, this));
+        spdlog::error( "Timeout invoked because {} : {}",error.value(),error.message());
     }
 }

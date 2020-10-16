@@ -39,12 +39,13 @@ public:
     void close()
     {
         boost::system::error_code ignored_ec;
-        if(ssl && stream)
+        sock.shutdown(boost::asio::ip::tcp::socket::shutdown_both,ignored_ec);
+        sock.close(ignored_ec);
+        if(stream)
         {
             stream->shutdown(ignored_ec);
             stream.reset();
         }
-        sock.close(ignored_ec);
     }
     void set_ssl(bool ssl_flag)
     {
