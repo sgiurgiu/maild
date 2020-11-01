@@ -110,6 +110,8 @@ std::string utils::get_part(mimetic::MimeEntity* me,
                                    const std::vector<std::string>& types,
                                    std::string boundary)
 {    
+    auto contentType = me->header().contentType();
+    //auto type = contentType.type();
     std::string subtype = me->header().contentType().subtype();
     if(me->header().contentType().isMultipart())
     {

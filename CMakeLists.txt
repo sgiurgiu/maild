@@ -32,6 +32,9 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+
 set(BEASTHTTP_DIR ${CMAKE_SOURCE_DIR}/external/beasthttp/BeastHttp)
 set(BEASTHTTP_INCLUDE ${BEASTHTTP_DIR}/include)
 add_subdirectory(external/fmt)

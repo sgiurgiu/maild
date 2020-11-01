@@ -84,7 +84,7 @@ void server_manager::run()
   auto num_threads = std::thread::hardware_concurrency();
   num_threads = std::max(num_threads,(decltype (num_threads))servers.size());
   std::vector<std::thread> v;
-  v.reserve(num_threads);
+  v.reserve(num_threads+1);
   using run_function = boost::asio::io_context::count_type(boost::asio::io_service::*)();
   for(size_t i =0;i<num_threads;i++) {
       v.emplace_back(std::thread(std::bind(

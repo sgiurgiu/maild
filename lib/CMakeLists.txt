@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(libmaild)
 
-set(Boost_USE_STATIC_LIBS        ON)
-set(Boost_USE_MULTITHREADED      ON)
-
-find_package(Boost 1.72 REQUIRED)
+find_package(Boost 1.73 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_library(PSQLCXX_LIBS pqxx)
 find_package(Tcmalloc)

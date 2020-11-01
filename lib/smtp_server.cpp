@@ -4,7 +4,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <spdlog/spdlog.h>
 
 using namespace maild;

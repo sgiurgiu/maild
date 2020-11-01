@@ -16,7 +16,7 @@ receiver_email = ["a@xvknp.com","b@xvknp.com","c@xvknp.com"]
 
 message = EmailMessage();
 
-with open('data/travel_spam.eml') as fp:
+with open('data/broken_message.eml') as fp:
     message = email.message_from_file(fp);
 
 
