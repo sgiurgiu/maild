@@ -44,18 +44,20 @@ void web_server::run()
 
     // Set router targets
     using pack2 = http::param::pack<int,  std::string>;
-    router.param<pack2>().get("/api/mails/(\\d+)/(\\w+)",
+    router.param<pack2>().get(R"(^/api/mails/(\d+)/(raw|html|text)$)",
                               [this](auto request, auto context, auto args) {
         web_api_server api_server(options.get_db_connection_string());
         auto id = std::get<0>(args);
         auto type = std::get<1>(args);
         spdlog::debug("Retrieving mail for id {} and type {} for url: {}",id,type,request.target().to_string());
-        context.send(api_server.get_mail(request,id,type));
+        auto rsp = api_server.get_mail(request,id,type);
+        context.send(rsp);
     });
     using pack3 = http::param::pack<std::string>;
-    router.param<pack3>().get(R"(^/api/mails/(.+))",
+    router.param<pack3>().get(R"(^/api/mails/([\w\d!#\$%&'\*\+\-=\?\^`\{\|]+)$)",
                               [this](auto request, auto context, auto args) {
         web_api_server api_server(options.get_db_connection_string());
+        spdlog::debug("Retrieving all mails for id {} for url: {}",std::get<0>(args),request.target().to_string());
         context.send(api_server.get_users_mails(request,std::get<0>(args)));
     });
     router.get(R"(^/$)", [&file_server](auto request, auto context) {

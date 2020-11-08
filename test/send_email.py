@@ -16,7 +16,7 @@ receiver_email = ["a@xvknp.com","b@xvknp.com","c@xvknp.com"]
 
 message = EmailMessage();
 
-with open('data/broken_message.eml') as fp:
+with open('data/linkedin.eml') as fp:
     message = email.message_from_file(fp);
 
 
@@ -39,7 +39,7 @@ def send_email():
         server.noop()    
         server.login(sender_email, password)    
         
-        server.sendmail(sender_email, receiver_email, "ASDASD")
+        server.sendmail(sender_email, receiver_email, message)
         #server.send_message(message)
         
         
@@ -69,7 +69,7 @@ def send_email_ssl():
         server.noop()    
         server.login(sender_email, password)    
         
-        server.sendmail(sender_email, receiver_email, "ASDASD")
+        server.sendmail(sender_email, receiver_email, message)
         #server.send_message(message)
         
         
