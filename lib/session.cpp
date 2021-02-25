@@ -23,13 +23,14 @@
 
 using namespace maild;
 
-session::session(boost::asio::io_context& io_context,
+session::session(const boost::asio::any_io_executor& executor,
                  const std::string& db_connection_string,const std::string& domain_name,
                  const certificates& certificate_files, bool is_fully_ssl)
                 : db_connection_string(db_connection_string),domain_name(domain_name),
-                  strand(boost::asio::make_strand(io_context)), socket(strand,certificate_files),
+                  strand(boost::asio::make_strand(executor)),
+                  socket(strand,certificate_files),
                   session_start(std::chrono::steady_clock::now()),is_fully_ssl(is_fully_ssl),
-                  timer(io_context)
+                  timer(executor)
 {
     commands["HELO"] = std::make_unique<hello_command>(socket);
     commands["EHLO"] = std::make_unique<ehlo_command>(socket,domain_name);

@@ -16,7 +16,8 @@ using namespace maild;
 using boost::asio::ip::tcp;
 
 server_manager::server_manager(const server_options& options):options(options),
-    signals(io_context, SIGINT, SIGTERM),cleanup_timer(cleanup_context)
+    server_threads(std::max(std::thread::hardware_concurrency(),static_cast<unsigned int>(options.get_servers().size()))),
+    signals(server_threads.get_executor(), SIGINT, SIGTERM),cleanup_timer(cleanup_context)
 {    
     prepare_database();
 }
@@ -67,7 +68,7 @@ void server_manager::run()
   for(const auto& server_info : options.get_servers())
   {
       if(!server_info.enabled) continue;
-      auto server = std::make_unique<smtp_server>(io_context,options.get_db_connection_string(),
+      auto server = std::make_unique<smtp_server>(server_threads.get_executor(),options.get_db_connection_string(),
                                                   server_info,options.get_domain_name(),
                                                   options.get_certificates());
       server->run();
@@ -81,29 +82,23 @@ void server_manager::run()
   cleanup_timer.expires_after(std::chrono::seconds(options.get_check_mail_interval_seconds()));
   cleanup_timer.async_wait(std::bind(&server_manager::cleanup_messages,this,std::placeholders::_1));
 
-  auto num_threads = std::thread::hardware_concurrency();
-  num_threads = std::max(num_threads,(decltype (num_threads))servers.size());
-  std::vector<std::thread> v;
-  v.reserve(num_threads+1);
-  using run_function = boost::asio::io_context::count_type(boost::asio::io_service::*)();
-  for(size_t i =0;i<num_threads;i++) {
-      v.emplace_back(std::thread(std::bind(
-                                     static_cast<run_function>(&boost::asio::io_context::run)
-                                     ,&io_context)));
-  }
-  v.emplace_back(std::thread(std::bind(
+
+  using run_function = boost::asio::io_context::count_type(boost::asio::io_context::*)();
+  auto cleanup_thread = std::thread(std::bind(
                                  static_cast<run_function>(&boost::asio::io_context::run)
-                                 ,&cleanup_context)));
-  for(size_t i=0;i<num_threads+1;i++) {
-      if(v.at(i).joinable()) {
-        v.at(i).join();
-      }
+                                 ,&cleanup_context));
+
+  server_threads.join();
+  if(cleanup_thread.joinable())
+  {
+      cleanup_thread.join();
   }
+
 }
 
 void server_manager::stop()
 {
   spdlog::info( "Received stop command.");
   cleanup_context.stop();
-  io_context.stop();
+  server_threads.stop();
 }

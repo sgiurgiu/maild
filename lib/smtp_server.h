@@ -6,7 +6,7 @@
 #include "server_options.h"
 #include <boost/system/error_code.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/any_io_executor.hpp>
 #include <unordered_set>
 #include <functional>
 #include <thread>
@@ -20,7 +20,7 @@ namespace maild {
 class smtp_server
 {
 public:
-    smtp_server(boost::asio::io_service& io_service,
+    smtp_server(const boost::asio::any_io_executor& executor,
                 const std::string& db_connection_string,
                 const server& server_options,
                 const std::string& domain_name,
@@ -46,7 +46,7 @@ private:
     std::string db_connection_string;
     std::string domain_name;
     certificates certificate_files;
-    boost::asio::io_service& io_service;
+    boost::asio::any_io_executor executor;
     boost::asio::ip::tcp::acceptor acceptor;
     server server_options;
 };

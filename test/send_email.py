@@ -39,7 +39,7 @@ def send_email():
         server.noop()    
         server.login(sender_email, password)    
         
-        server.sendmail(sender_email, receiver_email, message)
+        server.sendmail(sender_email, receiver_email, "AAA")
         #server.send_message(message)
         
         
@@ -59,9 +59,9 @@ def send_email_ssl():
     # server.starttls(context=context) # Secure the connection
     # server.ehlo() # Can be omitted
     # time.sleep(60*6)
-        dd = random.randrange(10)
-        if dd == 5:
-            time.sleep(60*6)
+        #dd = random.randrange(10)
+        #if dd == 5:
+        #    time.sleep(60*6)
             
         server.help()
         server.rset()
@@ -69,8 +69,8 @@ def send_email_ssl():
         server.noop()    
         server.login(sender_email, password)    
         
-        server.sendmail(sender_email, receiver_email, message)
-        #server.send_message(message)
+        #server.sendmail(sender_email, receiver_email, "XCXX")
+        server.send_message(message)
         
         
     except Exception as e:

@@ -7,7 +7,7 @@
 
 #include "maild_socket.h"
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -22,7 +22,7 @@ namespace maild {
 class session : public std::enable_shared_from_this<session>
 {
 public:
-    session(boost::asio::io_service& io_service, const std::string& db_connection_string,
+    session(const boost::asio::any_io_executor& executor, const std::string& db_connection_string,
             const std::string& domain_name, const certificates& certificate_files,
             bool is_fully_ssl);
     ~session() ;//= default;
@@ -59,7 +59,7 @@ private:
 private:
     std::string db_connection_string;
     std::string domain_name;
-    boost::asio::strand<boost::asio::io_context::executor_type> strand;
+    boost::asio::strand<boost::asio::any_io_executor> strand;
     maild_socket socket;
     boost::asio::streambuf response;
     boost::asio::streambuf request; 

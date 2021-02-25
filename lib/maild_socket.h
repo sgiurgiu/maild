@@ -3,6 +3,7 @@
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/read_until.hpp>
 #include <memory>
@@ -14,7 +15,7 @@ namespace maild {
 class maild_socket
 {
 public:
-    maild_socket(boost::asio::strand<boost::asio::io_context::executor_type>& strand,
+    maild_socket(boost::asio::strand<boost::asio::any_io_executor>& strand,
                  const certificates& certificate_files):
         sock(strand),ssl_context(boost::asio::ssl::context::sslv23_server)
     {

@@ -2,7 +2,8 @@
 #define MAILD_SERVER_MANAGER_H
 
 #include "server_options.h"
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/steady_timer.hpp>
 
@@ -21,7 +22,7 @@ private:
     void prepare_database();
 private:
     server_options options;    
-    boost::asio::io_context io_context;
+    boost::asio::thread_pool server_threads;
     boost::asio::io_context cleanup_context;
     boost::asio::signal_set signals;
     boost::asio::steady_timer cleanup_timer;

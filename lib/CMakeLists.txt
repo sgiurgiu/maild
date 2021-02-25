@@ -53,7 +53,7 @@ target_link_libraries(${LIBRARY_NAME} PUBLIC ${PSQLCXX_LIBS} ${PQ_LIB})
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${MAGIC_LIB} ${MIMETIC_LIB})
 target_link_libraries(${LIBRARY_NAME} PRIVATE spdlog::spdlog_header_only fmt::fmt-header-only)
 
-
+target_compile_definitions(${LIBRARY_NAME} PRIVATE BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
 if (Tcmalloc_FOUND)
     target_link_libraries(${LIBRARY_NAME} PUBLIC ${Tcmalloc_LIBRARIES})
 endif(Tcmalloc_FOUND)
