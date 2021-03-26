@@ -17,7 +17,7 @@ class maild_socket
 public:
     maild_socket(boost::asio::strand<boost::asio::any_io_executor>& strand,
                  const certificates& certificate_files):
-        sock(strand),ssl_context(boost::asio::ssl::context::sslv23_server)
+        sock(strand),ssl_context(boost::asio::ssl::context::tls_server)
     {
         ssl_context.set_options(boost::asio::ssl::context::default_workarounds
                                 | boost::asio::ssl::context::single_dh_use);

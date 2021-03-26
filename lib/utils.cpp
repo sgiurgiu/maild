@@ -12,7 +12,7 @@ void utils::configure_logs(const toml::node_view<toml::node>& logs_conf)
     for(const auto& log_conf : *logs_conf.as_table())
     {
         auto& value = *(log_conf.second.as_table());
-        auto type = value["type"].value_or("console");
+        std::string type = value["type"].value_or("console");
         auto level = value["level"].value_or("info");
         auto pattern = value["pattern"].value_or("[%D %T] [%l] %v");
         if(type == "console")
