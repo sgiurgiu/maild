@@ -1,0 +1,56 @@
+version: "3.9"
+
+networks:
+  maild_net:
+
+services:
+  db:
+    container_name: db
+    restart: always
+    build:
+      dockerfile: Dockerfile.db.build
+      context: .
+    
+    expose:
+      - 5432
+    networks:
+      - maild_net
+
+  maild_base:
+    image: maild_base
+    build:
+      dockerfile: Dockerfile.maild_base.build
+      context: .
+    
+
+  web:
+    container_name: maild_web 
+    restart: always
+    build:
+      dockerfile: Dockerfile.maild_web.build
+      context: .
+    
+    ports:
+      - "8443:8443"
+    networks:
+      - maild_net
+    depends_on:
+      - maild_base
+      - db
+
+  mail:
+    container_name: maild
+    build:
+      dockerfile: Dockerfile.maild.build
+      context: .
+    
+    ports:
+      - "2525:25"
+    networks:
+      - maild_net
+    restart: always
+    depends_on:
+      - maild_base      
+      - db
+
+      

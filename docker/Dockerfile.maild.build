@@ -1,0 +1,11 @@
+FROM maild_base
+
+LABEL maintainer="Sergiu Giurgiu <sgiurgiu11@gmail.com>"
+
+COPY maild.conf /etc/maild/
+COPY private.key /etc/maild/
+COPY dhparams.pem /etc/maild/
+COPY certificate.crt /etc/maild/
+
+ENTRYPOINT ["/usr/bin/maild", "-c", "/etc/maild/maild.conf"]
+EXPOSE 25

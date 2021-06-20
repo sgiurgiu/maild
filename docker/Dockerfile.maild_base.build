@@ -1,0 +1,15 @@
+FROM registry.fedoraproject.org/fedora-minimal:34
+
+LABEL maintainer="Sergiu Giurgiu <sgiurgiu11@gmail.com>"
+
+RUN mkdir /tmp/workdir
+WORKDIR /tmp/workdir
+COPY maild.rpm /tmp/workdir
+
+RUN microdnf -y install openssl-libs  libpqxx libpq file-libs \
+        mimetic gperftools-libs && \
+        microdnf clean all   && \
+        rpm -i /tmp/workdir/maild.rpm && \
+        rm -f /tmp/workdir/maild.rpm
+
+ENTRYPOINT ["/bin/bash"]

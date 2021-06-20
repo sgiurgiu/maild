@@ -1,0 +1,6 @@
+FROM docker.io/library/postgres
+ENV POSTGRES_USER maild
+ENV POSTGRES_PASSWORD maild
+ENV POSTGRES_DB maild
+ADD setupdb.sql /docker-entrypoint-initdb.d/
+

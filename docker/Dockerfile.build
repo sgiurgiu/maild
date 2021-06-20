@@ -1,0 +1,20 @@
+FROM registry.fedoraproject.org/fedora-minimal:34
+
+LABEL maintainer="Sergiu Giurgiu <sgiurgiu11@gmail.com>"
+
+WORKDIR /tmp/workdir
+COPY maild.tar.gz /tmp/workdir
+COPY ./build_maild.sh /tmp/workdir
+
+
+RUN microdnf -y install cmake gcc g++ \
+        tar rpm-build ninja-build boost-devel boost-static \
+        openssl-devel  libpqxx-devel libpq-devel file-devel \
+        mimetic-devel gperftools-devel && \
+        microdnf clean all   
+
+
+RUN tar -xzf /tmp/workdir/maild.tar.gz && ./build_maild.sh
+
+#CMD ["/tmp/workdir/maild/build/maild"]
+ENTRYPOINT ["/bin/bash"]
