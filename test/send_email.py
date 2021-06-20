@@ -53,7 +53,7 @@ def send_email_ssl():
     try:
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         #context.load_verify_locations('../conf/RootCA.crt')        
-        server = smtplib.SMTP_SSL("mail.xvknp.com", port, context=context)
+        server = smtplib.SMTP_SSL("localhost", 4587, context=context)
         server.set_debuglevel(1)
         server.ehlo() # Can be omitted
     # server.starttls(context=context) # Secure the connection
