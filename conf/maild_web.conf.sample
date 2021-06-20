@@ -6,6 +6,11 @@ ips=["0.0.0.0"]
 files_dir="/var/www/html/maild",
 api_prefix="/api"
 
+[certificate]
+    certificate_chain="conf/RootCA.crt"
+    private_key="conf/RootCA.key"
+    dh_file="conf/dh2048.pem"
+
 [log]
     [log.console]
         type="console"

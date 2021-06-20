@@ -20,6 +20,7 @@ public:
         sock(strand),ssl_context(boost::asio::ssl::context::tls_server)
     {
         ssl_context.set_options(boost::asio::ssl::context::default_workarounds
+                                | boost::asio::ssl::context::no_sslv2
                                 | boost::asio::ssl::context::single_dh_use);
         ssl_context.set_default_verify_paths();
         ssl_context.use_certificate_chain_file(certificate_files.certificate_chain);

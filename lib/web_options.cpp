@@ -39,6 +39,8 @@ void web_options::load(std::istream& conf_stream)
     api_prefix = main_conf["api_prefix"].value_or(api_prefix);
     spdlog::debug( "api_prefix:{}",api_prefix);
     port = main_conf["port"].value_or(8080);
+    ssl = main_conf["ssl"].value_or(false);
+
     spdlog::debug( "port:{}",port);
     auto ips_value = main_conf["ips"];
     if(ips_value.is_array())
@@ -50,6 +52,21 @@ void web_options::load(std::istream& conf_stream)
           spdlog::debug( "ips:{}",(*inserted.first));
       }
     }
+    if(configuration.contains("certificate"))
+    {
+        auto certs = configuration["certificate"];
+        certificate.certificate_chain=certs["certificate_chain"].value_or("");
+        certificate.private_key=certs["private_key"].value_or("");
+        certificate.dh_file=certs["dh_file"].value_or("");
+    }
+}
+web_certificate web_options::get_web_certificate() const
+{
+    return certificate;
+}
+bool web_options::is_ssl() const
+{
+    return ssl;
 }
 
 int web_options::get_port() const

@@ -28,11 +28,26 @@ server_manager::~server_manager()
 
 void server_manager::prepare_database()
 {
-   pqxx::connection db(options.get_db_connection_string());
-   pqxx::work w(db);
-   w.exec("create table if not exists counters (id varchar(50) primary key,counter bigint not null default 0)");
-   w.exec("insert into counters (id, counter) values ('mails_received',0) on conflict do nothing");
-   w.commit();
+   int retries = 10;
+   while(true)
+   {
+       try
+       {
+           pqxx::connection db(options.get_db_connection_string());
+           pqxx::work w(db);
+           w.exec("create table if not exists counters (id varchar(50) primary key,counter bigint not null default 0)");
+           w.exec("insert into counters (id, counter) values ('mails_received',0) on conflict do nothing");
+           w.commit();
+           break;
+       }
+       catch(const std::exception& ex)
+       {
+           if(retries <= 0)
+            throw;
+           --retries;
+           std::this_thread::sleep_for(std::chrono::seconds(10));
+       }
+   }
 }
 
 void server_manager::cleanup_messages(const boost::system::error_code& error)

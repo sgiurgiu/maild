@@ -152,7 +152,9 @@ void session::handle_complete_quit_command(const boost::system::error_code& /*er
         //deadlock possible apparently. we're low load so we're fine
         db.prepare("mail_count_increment","update counters set counter=counter+1 where id='mails_received'");
         pqxx::work w(db);
-        pqxx::binarystring blob(mail_message.body);
+        std::basic_string<std::byte> blob(
+                    static_cast<const std::byte *>(static_cast<const void *>(mail_message.body.data())),
+                    mail_message.body.size());
         for(const auto& to : mail_message.to)
         {            
             std::string username = "";

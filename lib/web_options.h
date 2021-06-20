@@ -7,6 +7,13 @@
 
 namespace maild {
 
+struct web_certificate
+{
+    std::string certificate_chain;
+    std::string private_key;
+    std::string dh_file;
+};
+
 class web_options
 {
 public:
@@ -18,6 +25,8 @@ public:
     std::set<std::string> get_ips() const;
     std::string get_files_dir() const;
     std::string get_api_prefix() const;
+    web_certificate get_web_certificate() const;
+    bool is_ssl() const;
 private:    
     int port = 8080;
     std::string domain_name = "sergiu-pc.zergiu.com";
@@ -25,6 +34,8 @@ private:
     std::string db_connection_string = "postgresql://maild:maild@localhost/maild";
     std::string files_dir = "www";
     std::string api_prefix = "/api";
+    bool ssl = false;
+    web_certificate certificate;
 };
 }
 

@@ -9,7 +9,7 @@ import threading
 import random
 
 
-port = 4587  # For SSL
+port = 465  # For SSL
 password = "bla"
 sender_email = "my@gmail.com"
 receiver_email = ["a@xvknp.com","b@xvknp.com","c@xvknp.com"]
@@ -26,8 +26,8 @@ with open('data/linkedin.eml') as fp:
 def send_email():    
     try:
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        context.load_verify_locations('../conf/RootCA.crt')
-        server = smtplib.SMTP("localhost", 2525)
+        #context.load_verify_locations('../conf/RootCA.crt')
+        server = smtplib.SMTP("mail.xvknp.com", 2525)
         server.set_debuglevel(1)
         server.ehlo() # Can be omitted
         server.starttls(context=context) # Secure the connection
@@ -52,8 +52,8 @@ def send_email():
 def send_email_ssl():    
     try:
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        context.load_verify_locations('../conf/RootCA.crt')        
-        server = smtplib.SMTP_SSL("localhost", port, context=context)
+        #context.load_verify_locations('../conf/RootCA.crt')        
+        server = smtplib.SMTP_SSL("mail.xvknp.com", port, context=context)
         server.set_debuglevel(1)
         server.ehlo() # Can be omitted
     # server.starttls(context=context) # Secure the connection
@@ -80,15 +80,17 @@ def send_email_ssl():
         server.quit() 
 
 threads = list()
+
+for i in range(10):
+    #x = threading.Thread(target=send_email);
+    #threads.append(x)
+    #x.start()
+    print("no")
+    
+
 for i in range(10):
     x = threading.Thread(target=send_email_ssl);
     threads.append(x)
     x.start()
-    
-for i in range(10):
-    x = threading.Thread(target=send_email);
-    threads.append(x)
-    x.start()
-    
 for t in threads:
     t.join()

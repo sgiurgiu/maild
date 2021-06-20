@@ -31,13 +31,16 @@ web_api_server::response web_api_server::get_users_mails(const request& request,
     for (int rownum=0; rownum < num_rows; ++rownum)
     {
         const pqxx::row row = result[rownum];
-        json mail_row = json::object();
-        pqxx::binarystring body_raw(row[2]);
+        json mail_row = json::object();        
+        std::basic_string<std::byte> body_raw = row[2].as<std::basic_string<std::byte>>();
         mail_row["from"] = row[0].as<std::string>();
         mail_row["to"] = row[1].as<std::string>();
         mail_row["date"] = row[3].as<std::string>();
         mail_row["id"] = row[4].as<int64_t>();
-        std::stringstream body_raw_stream(body_raw.str());
+        std::string body_raw_str(
+                    static_cast<const char *>(static_cast<const void *>(body_raw.data())),
+                    body_raw.size());
+        std::stringstream body_raw_stream(body_raw_str);
         mail_row["subject"] = utils::get_subject(body_raw_stream);
         mails_array.push_back(mail_row);
     }
@@ -65,14 +68,17 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
             rsp.result(boost::beast::http::status::ok);
             rsp.version(request.version());
             rsp.set(boost::beast::http::field::server, MAILD_STRING);
-            
-            pqxx::binarystring body_raw (result[0][0]);
-            std::stringstream body_raw_stream(body_raw.str());
+            std::basic_string<std::byte> body_raw = result[0][0].as<std::basic_string<std::byte>>();
+            std::string body_raw_str(
+                        static_cast<const char *>(static_cast<const void *>(body_raw.data())),
+                        body_raw.size());
+
+            std::stringstream body_raw_stream(body_raw_str);
             if(type == "raw")
             {
                 rsp.set(boost::beast::http::field::content_length, std::to_string(body_raw.size()));
                 rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");
-                rsp.body() = (body_raw.str());
+                rsp.body() = (body_raw_str);
             } 
             else if (type == "html")
             {
