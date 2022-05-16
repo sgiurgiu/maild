@@ -103,6 +103,11 @@ void session::handle_parse_commands(const boost::system::error_code& error, std:
     if(error)
     {
         spdlog::error( "Error reading command {}",error.message());
+        if(!mail_message.to.empty())
+        {
+            // we got something here, let's just save what we have
+            handle_complete_quit_command({},0);
+        }
         return;
     }
     if(bytes_transferred <= 5)
