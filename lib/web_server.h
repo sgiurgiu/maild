@@ -18,10 +18,10 @@ private:
 private:
     web_options options;
     boost::asio::ssl::context ssl_context;
-    std::string apiMailContentRegex = {R"(^/api/mails/(\d+)/(raw|html|text)$)"};
-    std::string apiMailsRegex = {R"(^/api/mails/([\w\d!#\$%&'\*\+\-=\?\^`\{\|]+)$)"};
+    std::string apiMailContentRegex = {R"(^/api/mail/(\d+)/(raw|html|text)$)"};
+    std::string apiMailsRegex = {R"(^/api/mails/(.+)$)"};
     std::string indexHtmlRegex = {R"(^/$)"};
-    std::string filesRegex = {R"(^/(?:(?!api/mails)[a-zA-Z_\s\-\.\/])+$)"};
+    std::string filesRegex = {R"(^/(?:(?!api/)[a-zA-Z_\s\-\.\/])+$)"};
     std::string everythingElseRegex = {R"(^.*$)"};
 };
 

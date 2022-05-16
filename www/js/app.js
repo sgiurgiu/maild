@@ -37,9 +37,9 @@ function retrieve_and_show_mail() {
 			html_tabs += '<li class="nav-item" role="presentation"><a id="raw_tab_'+id+'" class="nav-link" href="#raw_part'+id+'" aria-selected="false" aria-controls="raw_part'+id+'" role="tab" data-toggle="tab">Raw</a></li>';        
 			html_tabs += '</ul>';
 			html_tabs += '<div class="tab-content" >';			
-			html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane show active" aria-labelledby="html_tab_'+id+'" id="html_part'+id+'"><iframe  frameborder="0" border="0" cellspacing="0"  width="100%" height="100%"  src="/api/mails/'+id+'/html"/></div>';        
-			html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" aria-labelledby="text_tab_'+id+'" id="text_part'+id+'"><iframe frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mails/'+id+'/text"/></div>';        
-			html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" aria-labelledby="raw_tab_'+id+'" id="raw_part'+id+'"><iframe  frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mails/'+id+'/raw"/></div>';        			
+            html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane show active" aria-labelledby="html_tab_'+id+'" id="html_part'+id+'"><iframe  frameborder="0" border="0" cellspacing="0"  width="100%" height="100%"  src="/api/mail/'+id+'/html"/></div>';
+            html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" aria-labelledby="text_tab_'+id+'" id="text_part'+id+'"><iframe frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mail/'+id+'/text"/></div>';
+            html_tabs += '    <div role="tabpanel" style="height: 500px;" class="tab-pane" aria-labelledby="raw_tab_'+id+'" id="raw_part'+id+'"><iframe  frameborder="0" border="0" cellspacing="0"  width="100%" height="100%" style="border-style:none" src="/api/mail/'+id+'/raw"/></div>';
 			html_tabs += '</div>';
 			html_tabs += '</div>';        
 
