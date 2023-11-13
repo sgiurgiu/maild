@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import smtplib, ssl, email
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -25,9 +25,11 @@ with open('data/linkedin.eml') as fp:
 #/*, context=context*/
 def send_email():    
     try:
-        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context = ssl.create_default_context()
         #context.load_verify_locations('../conf/RootCA.crt')
-        server = smtplib.SMTP("mail.xvknp.com", 2525)
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        server = smtplib.SMTP("localhost", 2525)
         server.set_debuglevel(1)
         server.ehlo() # Can be omitted
         server.starttls(context=context) # Secure the connection
@@ -51,8 +53,11 @@ def send_email():
 
 def send_email_ssl():    
     try:
-        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context = ssl.create_default_context()
         #context.load_verify_locations('../conf/RootCA.crt')        
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
         server = smtplib.SMTP_SSL("localhost", 4587, context=context)
         server.set_debuglevel(1)
         server.ehlo() # Can be omitted
@@ -82,9 +87,9 @@ def send_email_ssl():
 threads = list()
 
 for i in range(10):
-    #x = threading.Thread(target=send_email);
-    #threads.append(x)
-    #x.start()
+    x = threading.Thread(target=send_email);
+    threads.append(x)
+    x.start()
     print("no")
     
 

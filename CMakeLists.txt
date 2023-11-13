@@ -1,33 +1,32 @@
 cmake_minimum_required(VERSION 3.15)
-project(maild)
 
 option(TESTS_ENABLED "Enable tests" ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_LIST_DIR}/vcpkg-ports")
+set(VCPKG_C_FLAGS "-DOPENSSL_NO_AUTOLOAD_CONFIG ${VCPKG_C_FLAGS}")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(ENABLE_TESTS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+
+
+project(maild)
+
 
 SET(MAILD_VERSION_MAJOR "0")
 SET(MAILD_VERSION_MINOR "1")
-SET(MAILD_VERSION_PATCH "16")
+SET(MAILD_VERSION_PATCH "17")
+set(MAILD_VERSION "${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
+set(MAILD_STRING "MailD v${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
 
-add_definitions(-DMAILD_VERSION="${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
-add_definitions(-DMAILD_STRING="MailD v${MAILD_VERSION_MAJOR}.${MAILD_VERSION_MINOR}.${MAILD_VERSION_PATCH}")
-
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
-endif()
-
-if(CMAKE_CXX_STANDARD)
-    set(conan_std cppstd=${CMAKE_CXX_STANDARD})
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if(CMAKE_BUILD_TYPE EQUAL "Debug")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
-endif()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -37,9 +36,8 @@ set(Boost_USE_MULTITHREADED      ON)
 
 set(BEASTHTTP_DIR ${CMAKE_SOURCE_DIR}/external/beasthttp/BeastHttp)
 set(BEASTHTTP_INCLUDE ${BEASTHTTP_DIR}/include)
-add_subdirectory(external/fmt)
-add_subdirectory(external/spdlog)
-add_definitions(-DSPDLOG_FMT_EXTERNAL_HO -DSPDLOG_FMT_EXTERNAL)
+#add_subdirectory(external/fmt)
+#add_subdirectory(external/spdlog)
 
 file(GLOB_RECURSE HEADERS *.h *.hpp *.hxx )
 add_custom_target(Headers SOURCES ${HEADERS})

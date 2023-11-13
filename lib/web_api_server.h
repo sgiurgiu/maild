@@ -14,12 +14,11 @@ class web_api_server
 {
 private:
     using response = boost::beast::http::response<boost::beast::http::string_body>;
-    using request = boost::beast::http::request<boost::beast::http::string_body>;
 public:
     web_api_server();
     web_api_server(const std::string& db_conn_string);
-    response get_users_mails(const request& request, const std::string& user);
-    response get_mail(const request& request,int id,const std::string& type);
+    response get_users_mails(const std::string& user);
+    response get_mail(int id,const std::string& type);
 private:
     pqxx::connection db;
 };

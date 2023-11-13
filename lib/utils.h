@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <istream>
+#include <cstdint>
 #include <mimetic/mimetic.h>
 #include "toml.hpp"
 

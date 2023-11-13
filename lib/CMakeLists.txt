@@ -1,21 +1,17 @@
 cmake_minimum_required(VERSION 3.15)
 project(libmaild)
 
-find_package(Boost 1.73 REQUIRED)
+find_package(Boost 1.73 REQUIRED filesystem system)
 find_package(OpenSSL REQUIRED)
-find_library(PSQLCXX_LIBS pqxx)
-find_package(Tcmalloc)
+find_package(libpqxx CONFIG REQUIRED)
 find_package(Threads)
 find_library(MAGIC_LIB magic)
 find_library(MIMETIC_LIB mimetic)
 #this is needed when pqxx is statically compiled
-find_library(PQ_LIB pq)
-
-include_directories(${Boost_INCLUDE_DIR} ${BEASTHTTP_INCLUDE})
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)  
-    add_definitions(-DMAILD_DEBUG)
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
+#find_library(PQ_LIB pq)
+find_package(spdlog CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(Crow CONFIG REQUIRED)
 
 set(LIBMAILD_SRCS 
         smtp_server.cpp 
@@ -45,15 +41,23 @@ set(LIBMAILD_SRCS
 set(LIBRARY_NAME "maillib")        
 add_library(${LIBRARY_NAME} STATIC ${LIBMAILD_SRCS})
 
+target_compile_definitions(${LIBRARY_NAME} PRIVATE SPDLOG_FMT_EXTERNAL_HO SPDLOG_FMT_EXTERNAL)
+target_compile_definitions(${LIBRARY_NAME} PRIVATE BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+target_compile_definitions(${LIBRARY_NAME} PRIVATE "$<$<CONFIG:Debug>:MAILD_DEBUG>")
+target_compile_definitions(${LIBRARY_NAME} PRIVATE MAILD_VERSION="${MAILD_VERSION}")
+target_compile_definitions(${LIBRARY_NAME} PRIVATE MAILD_STRING="${MAILD_STRING}")
 
-target_link_libraries(${LIBRARY_NAME} PUBLIC  ${CMAKE_THREAD_LIBS_INIT})
+target_compile_options(${LIBRARY_NAME} PUBLIC $<$<AND:$<CONFIG:Debug>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-Wall -pedantic -Wextra>)
+
+target_link_libraries(${LIBRARY_NAME} PUBLIC Threads::Threads)
 target_link_libraries(${LIBRARY_NAME} PUBLIC OpenSSL::SSL)
-target_link_libraries(${LIBRARY_NAME} PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(${LIBRARY_NAME} PUBLIC ${PSQLCXX_LIBS} ${PQ_LIB})
+target_link_libraries(${LIBRARY_NAME} PUBLIC Boost::boost Boost::filesystem)
+target_link_libraries(${LIBRARY_NAME} PUBLIC libpqxx::pqxx)
 target_link_libraries(${LIBRARY_NAME} PUBLIC ${MAGIC_LIB} ${MIMETIC_LIB})
+target_link_libraries(${LIBRARY_NAME} PRIVATE Crow::Crow)
 target_link_libraries(${LIBRARY_NAME} PRIVATE spdlog::spdlog_header_only fmt::fmt-header-only)
 
-target_compile_definitions(${LIBRARY_NAME} PRIVATE BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+
 if (Tcmalloc_FOUND)
     target_link_libraries(${LIBRARY_NAME} PUBLIC ${Tcmalloc_LIBRARIES})
 endif(Tcmalloc_FOUND)

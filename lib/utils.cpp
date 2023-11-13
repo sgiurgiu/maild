@@ -156,7 +156,7 @@ std::string utils::get_part(mimetic::MimeEntity* me,
             }
 
             //LOG4CXX_DEBUG(logger, "returning body :"<<body<<" of length "<<body.length());
-            return std::move(body);
+            return body;
         }
     }
 

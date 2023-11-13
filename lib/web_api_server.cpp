@@ -8,6 +8,12 @@
 
 #include <spdlog/spdlog.h>
 
+
+namespace
+{
+    constexpr auto SERVER_NAME = MAILD_STRING;
+};
+
 using json = nlohmann::json;
 using namespace maild;
 
@@ -21,7 +27,7 @@ web_api_server::web_api_server(const std::string& db_conn_string):db(db_conn_str
     db.prepare("get_mail","select body from mails where id=$1");
 }
 
-web_api_server::response web_api_server::get_users_mails(const request& request, const std::string& user)
+web_api_server::response web_api_server::get_users_mails(const std::string& user)
 {    
     pqxx::work w(db);
     pqxx::result result = w.exec_prepared("get_users_mails",user);
@@ -47,16 +53,14 @@ web_api_server::response web_api_server::get_users_mails(const request& request,
     std::string contents = mails_array.dump();
     response rsp;
     rsp.result(boost::beast::http::status::ok);
-    rsp.version(request.version());
-    rsp.set(boost::beast::http::field::server, MAILD_STRING);
+    rsp.set(boost::beast::http::field::server, SERVER_NAME);
     rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
     rsp.set(boost::beast::http::field::content_type,"application/json; charset=UTF-8");
     rsp.body() = (contents);
     rsp.prepare_payload();
-    rsp.keep_alive(request.keep_alive());
     return rsp;
 }
-web_api_server::response web_api_server::get_mail(const request& request,int id,const std::string& type)
+web_api_server::response web_api_server::get_mail(int id,const std::string& type)
 {    
     pqxx::work w(db);
     response rsp;
@@ -66,8 +70,7 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
         if(result.size() == 1)
         {
             rsp.result(boost::beast::http::status::ok);
-            rsp.version(request.version());
-            rsp.set(boost::beast::http::field::server, MAILD_STRING);
+            rsp.set(boost::beast::http::field::server, SERVER_NAME);
             std::basic_string<std::byte> body_raw = result[0][0].as<std::basic_string<std::byte>>();
             std::string body_raw_str(
                         static_cast<const char *>(static_cast<const void *>(body_raw.data())),
@@ -98,8 +101,7 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
         else
         {
             rsp.result(boost::beast::http::status::not_found);
-            rsp.version(request.version());
-            rsp.set(boost::beast::http::field::server, MAILD_STRING);
+            rsp.set(boost::beast::http::field::server, SERVER_NAME);
             rsp.body() = ("Not found");
         }
     }
@@ -109,7 +111,6 @@ web_api_server::response web_api_server::get_mail(const request& request,int id,
         throw;
     }
     rsp.prepare_payload();
-    rsp.keep_alive(request.keep_alive());
     return rsp;
 }
 

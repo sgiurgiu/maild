@@ -1,0 +1,17 @@
+{
+  "name": "libmimetic",
+  "version": "0.9.8",
+  "description": "LibMimetic, Email library (MIME)",
+  "homepage": "http://www.codesink.org/mimetic_mime_library.html",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

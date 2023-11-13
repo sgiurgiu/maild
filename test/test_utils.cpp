@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include <utils.h>
-
+#include <fstream>
 
 using namespace maild;
 using namespace std;

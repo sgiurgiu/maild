@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "maild",
+  "version": "0.0.1",
+  "dependencies": [
+    "boost",
+    "fmt",
+    "spdlog",
+    "openssl",
+    "libpqxx",
+    "libmagic",
+    "crow",
+    "libmimetic"
+  ],
+  "features": {
+    "app": {
+        "description": "The maild App"
+    },
+    "tests": {
+        "description": "Build tests",
+        "dependencies": ["gtest"]
+    }
+  }
+
+}
+

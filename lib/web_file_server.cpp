@@ -2,6 +2,7 @@
 #include "web_not_found_exception.h"
 #include "magic_handler.h"
 #include <sstream>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <spdlog/spdlog.h>
 
@@ -13,15 +14,13 @@ web_file_server::web_file_server(const std::string& path):path(path),magic(std::
 web_file_server::~web_file_server() = default;
 
 boost::beast::http::response<boost::beast::http::string_body>
-    web_file_server::get_file_contents(const boost::beast::http::request<boost::beast::http::string_body>& request,
-                                       const std::string& file)
+    web_file_server::get_file_contents(const std::string& file)
 {    
     boost::beast::http::response<boost::beast::http::string_body> rsp;
     try{                
         std::string file_name = get_file(file).string();
         std::ifstream in (file_name);   
         rsp.result(boost::beast::http::status::ok);
-        rsp.version(request.version());
         rsp.set(boost::beast::http::field::server, MAILD_STRING);
         std::string contents = (static_cast<std::stringstream const&>(std::stringstream() << in.rdbuf()).str());
         rsp.set(boost::beast::http::field::content_length, std::to_string(contents.length()));
@@ -33,12 +32,10 @@ boost::beast::http::response<boost::beast::http::string_body>
     catch(const web_not_found_exception& ex)
     {
         rsp.result(boost::beast::http::status::not_found);
-        rsp.version(request.version());
         rsp.set(boost::beast::http::field::content_type,"text/plain; charset=UTF-8");
         rsp.body() = ex.what();
     }
     rsp.prepare_payload();
-    rsp.keep_alive(request.keep_alive());
     return rsp;
 }
 
