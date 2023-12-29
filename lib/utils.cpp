@@ -205,10 +205,17 @@ namespace
                     auto output_stream = g_mime_stream_mem_new();
                     auto message_length = g_mime_data_wrapper_write_to_stream(content, output_stream);
                     g_mime_stream_flush(output_stream);
-                    auto array = g_mime_stream_mem_get_byte_array((GMimeStreamMem*)output_stream);
-                    std::string body((char*)array->data, array->len);
-                    g_object_unref(output_stream);
-                    message_part->body = body;
+                    if(message_length <= 0)
+                    {
+                        message_part->body = "N/A";
+                    }
+                    else
+                    {
+                        auto array = g_mime_stream_mem_get_byte_array((GMimeStreamMem *)output_stream);
+                        std::string body((char *)array->data, array->len);
+                        g_object_unref(output_stream);
+                        message_part->body = body;
+                    }
                     return;
                 }
             }
