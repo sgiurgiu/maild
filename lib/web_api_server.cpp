@@ -47,7 +47,7 @@ web_api_server::response web_api_server::get_users_mails(const std::string& user
                     static_cast<const char *>(static_cast<const void *>(body_raw.data())),
                     body_raw.size());
         std::stringstream body_raw_stream(body_raw_str);
-        mail_row["subject"] = utils::get_subject(body_raw_stream);
+        mail_row["subject"] = utils::get_subject(body_raw_stream).value_or("");
         mails_array.push_back(mail_row);
     }
     std::string contents = mails_array.dump();

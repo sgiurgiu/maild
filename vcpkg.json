@@ -3,14 +3,21 @@
   "name": "maild",
   "version": "0.0.1",
   "dependencies": [
-    "boost",
+    "boost-asio",
+    "boost-algorithm",
+    "boost-system",
+    "boost-program-options",
+    "boost-beast",
+    "boost-filesystem",
     "fmt",
     "spdlog",
     "openssl",
     "libpqxx",
     "libmagic",
     "crow",
-    "libmimetic"
+    "glib",
+    "gmime",
+    "pcre2"
   ],
   "features": {
     "app": {

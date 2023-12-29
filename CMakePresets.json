@@ -16,18 +16,40 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "TESTS_ENABLED": "ON"
             }
+        },
+        {
+            "name": "release",
+            "binaryDir": "${sourceDir}/build-release",
+            "description": "Release build using Ninja generator",
+            "generator": "Ninja",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "TESTS_ENABLED": "OFF"
+            }
         }
     ],
     "buildPresets": [
         {
             "name": "default",
             "configurePreset": "default"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release"
         }
     ],
     "packagePresets": [
         {
             "name": "default",
             "configurePreset": "default",
+            "generators": [
+                "RPM"
+            ]
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
             "generators": [
                 "RPM"
             ]
@@ -50,6 +72,23 @@
                     "name": "default"
                 }
             ]
-        }
+        },
+        {
+            "name": "release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release"
+                },
+                {
+                    "type": "build",
+                    "name": "release"
+                },
+                {
+                    "type": "package",
+                    "name": "release"
+                }
+            ]
+        }        
     ]
 }

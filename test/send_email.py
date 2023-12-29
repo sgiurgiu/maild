@@ -16,8 +16,8 @@ receiver_email = ["a@xvknp.com","b@xvknp.com","c@xvknp.com"]
 
 message = EmailMessage();
 
-with open('data/linkedin.eml') as fp:
-    message = email.message_from_file(fp);
+with open('data/travel_spam.eml') as fp:
+    message = email.message_from_file(fp)
 
 
 # Create a secure SSL context
@@ -41,8 +41,8 @@ def send_email():
         server.noop()    
         server.login(sender_email, password)    
         
-        server.sendmail(sender_email, receiver_email, "AAA")
-        #server.send_message(message)
+        #server.sendmail(sender_email, receiver_email, "AAA")
+        server.send_message(message)
         
         
     except Exception as e:
@@ -86,16 +86,16 @@ def send_email_ssl():
 
 threads = list()
 
-for i in range(10):
+for i in range(1):
     x = threading.Thread(target=send_email);
     threads.append(x)
     x.start()
     print("no")
     
 
-for i in range(10):
-    x = threading.Thread(target=send_email_ssl);
-    threads.append(x)
-    x.start()
-for t in threads:
-    t.join()
+#for i in range(10):
+#    x = threading.Thread(target=send_email_ssl);
+#    threads.append(x)
+#    x.start()
+#for t in threads:
+#    t.join()

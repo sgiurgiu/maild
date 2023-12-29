@@ -8,6 +8,9 @@
 #include <fstream>
 #include <filesystem>
 #include <spdlog/spdlog.h>
+
+#include <gmime/gmime.h>
+
 using namespace maild;
 
 
@@ -59,7 +62,9 @@ int main(int argc, char **argv) {
     }
 
     try
-    {        
+    {
+        g_mime_init();
+        
         spdlog::info( "Starting MailDWeb server...");
         web_server server(options);
         server.run();

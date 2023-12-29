@@ -4,8 +4,8 @@
 #include <vector>
 #include <istream>
 #include <cstdint>
-#include <mimetic/mimetic.h>
 #include "toml.hpp"
+#include <optional>
 
 namespace maild {
     class utils final{
@@ -43,23 +43,15 @@ namespace maild {
 
             return address.substr(index1+1,index2-index1-1);
         }
-        static std::string parse_utf8_string(const std::string& subj);
+        //static std::string parse_utf8_string(const std::string& subj);
 
-        static std::string get_subject(std::istream& in)
-        {
-            mimetic::MimeEntity me(in);
-            return parse_utf8_string(me.header().subject());
-        }
+        static std::optional<std::string> get_subject(std::istream& in);
         
-        static std::string get_part(std::istream& in,const std::vector<std::string>& types)
-        {
-            mimetic::MimeEntity me(in);                   
-            return get_part(&me,types);            
-        }
+        static std::string get_part(std::istream& in,const std::vector<std::string>& types);
         static void configure_logs(const toml::node_view<toml::node>& node);
     private:
         static std::string::size_type get_next_utf8_part(const std::string& subj, std::string& decodedString);
-        static std::string get_part(mimetic::MimeEntity* me,const std::vector<std::string>& types, std::string boundary = "");
+        //static std::string get_part(mimetic::MimeEntity* me,const std::vector<std::string>& types, std::string boundary = "");
         
 
     };

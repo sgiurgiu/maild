@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include <utils.h>
 #include <fstream>
+#include <gmime/gmime.h>
 
 using namespace maild;
 using namespace std;
@@ -9,10 +10,13 @@ class UtilsTest : public ::testing::Test {
  protected:
   void SetUp() override
   {
-
+      g_mime_init();
   }
 
-  // void TearDown() override {}
+  void TearDown() override 
+  {
+    g_mime_shutdown();
+  }
 };
 
 TEST_F(UtilsTest, ParseAddress)
@@ -39,6 +43,26 @@ TEST_F(UtilsTest,GetMailTo)
   EXPECT_EQ(utils::get_mail_to(" TO:a@a.com>"),"");
   EXPECT_EQ(utils::get_mail_to(" :<a@a.com>"),"");
 }
+TEST_F(UtilsTest, ParseSubjectSimple)
+{
+    ifstream test_file("data/test.eml");
+    EXPECT_TRUE(test_file.good());
+    auto subject = utils::get_subject(test_file);
+    EXPECT_TRUE(subject.has_value());
+    cout << subject.value() << endl;
+    EXPECT_EQ(subject.value(), "etrdfdfgfg");
+}
+
+TEST_F(UtilsTest, ParseSubjectUTFEncoded)
+{
+    ifstream test_file("data/travel_spam.eml");
+    EXPECT_TRUE(test_file.good());
+    auto subject = utils::get_subject(test_file);
+    ASSERT_TRUE(subject.has_value());
+    cout << subject.value() << endl;
+    EXPECT_EQ(subject.value(), "\xE2\x9C\x88\xEF\xB8\x8F\xC2\xA0[TRAVEL INSURANCE] | Optimal Travel\xE2\x84\xA2 Insurance");
+}
+
 TEST_F(UtilsTest,ParseBodyHtmlPart)
 {
     ifstream test_file("data/test.eml");
@@ -58,18 +82,19 @@ TEST_F(UtilsTest,ParseBodyPlainPart)
 
 TEST_F(UtilsTest,ParseBodyHtmlPartLinkedinEmail)
 {
-    ifstream test_file("data/travel_spam.eml");
+    ifstream test_file("data/linkedin.eml");
     EXPECT_TRUE(test_file.good());
     string html_body = utils::get_part(test_file,{"html"});
-    EXPECT_EQ(html_body.length(),53017u);
+    EXPECT_EQ(html_body.length(), 88251u);
 }
 TEST_F(UtilsTest,ParseBodyTextPartLinkedinEmail)
 {
-    ifstream test_file("data/travel_spam.eml");
+    ifstream test_file("data/linkedin.eml");
     EXPECT_TRUE(test_file.good());
     string html_body = utils::get_part(test_file,{"text","plain"});
-    EXPECT_EQ(html_body.length(),2816u);
+    EXPECT_EQ(html_body.length(), 7407u);
 }
+/*
 TEST_F(UtilsTest, ParseUtf8SubjectPlain)
 {
     EXPECT_EQ(utils::parse_utf8_string("aa"),"aa");
@@ -113,3 +138,4 @@ TEST_F(UtilsTest, ParseUtf8SubjectUtfFullBlownComposedWithExtraCharsInside)
                          };
     EXPECT_EQ(decoded,expected);
 }
+*/

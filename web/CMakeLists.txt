@@ -4,6 +4,9 @@ project(maild_web)
 find_package(Boost 1.73 REQUIRED program_options)
 find_package(spdlog CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB REQUIRED IMPORTED_TARGET glib-2.0 gobject-2.0 gmodule-2.0 gio-2.0)
+find_package(pcre2 CONFIG REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_INCLUDE_DIR})
 
@@ -17,6 +20,8 @@ target_compile_definitions(${EXECUTABLE_NAME} PRIVATE MAILD_VERSION="${MAILD_VER
 target_link_libraries(${EXECUTABLE_NAME} PUBLIC maillib)
 target_link_libraries(${EXECUTABLE_NAME} PUBLIC Boost::program_options)
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE spdlog::spdlog_header_only fmt::fmt-header-only)
+target_link_libraries(${EXECUTABLE_NAME} PUBLIC PkgConfig::GLIB)
+target_link_libraries(${EXECUTABLE_NAME} PUBLIC PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX)
 
 install(TARGETS ${EXECUTABLE_NAME}  RUNTIME DESTINATION bin)
 

@@ -95,8 +95,9 @@ void server_manager::run()
     });
 
   cleanup_timer.expires_after(std::chrono::seconds(options.get_check_mail_interval_seconds()));
+#ifndef MAILD_DEBUG
   cleanup_timer.async_wait(std::bind(&server_manager::cleanup_messages,this,std::placeholders::_1));
-
+#endif
 
   using run_function = boost::asio::io_context::count_type(boost::asio::io_context::*)();
   auto cleanup_thread = std::thread(std::bind(
