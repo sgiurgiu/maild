@@ -38,7 +38,8 @@ void web_server::run()
         {
             resp.add_header(h.name_string(), h.value());
         }
-        return resp; });
+        return resp; 
+    });
 
     CROW_ROUTE(app, "/api/mails/<string>").methods("GET"_method)([con = options.get_db_connection_string()](const std::string &username)
                                                                  {   
@@ -51,7 +52,8 @@ void web_server::run()
         {
             resp.add_header(h.name_string(), h.value());
         }
-        return resp; });
+        return resp; 
+    });
 
     CROW_ROUTE(app, "/<path>").methods("GET"_method)([&file_server](const std::string &path)
     {   

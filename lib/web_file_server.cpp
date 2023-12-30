@@ -1,6 +1,5 @@
 #include "web_file_server.h"
 #include "web_not_found_exception.h"
-#include "magic_handler.h"
 #include <sstream>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -8,7 +7,7 @@
 
 using namespace maild;
 
-web_file_server::web_file_server(const std::string& path):path(path),magic(std::make_unique<magic_handler>())
+web_file_server::web_file_server(const std::string& path):path(path)
 {
 }
 web_file_server::~web_file_server() = default;
@@ -72,7 +71,14 @@ std::string web_file_server::get_mime_type(const std::string& file)
   {
     return "text/html; charset=UTF-8";
   }
-  
-  return magic->get_mime(file);
+  if (file.rfind(".ico") == (file.length() - 4))
+  {
+    return "image/x-icon";
+  }
+  if (file.rfind(".gif") == (file.length() - 4))
+  {
+    return "image/gif";
+  }
 
+  return "application/octet-stream";
 }

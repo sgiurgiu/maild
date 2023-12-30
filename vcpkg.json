@@ -13,7 +13,6 @@
     "spdlog",
     "openssl",
     "libpqxx",
-    "libmagic",
     "crow",
     "glib",
     "gmime",

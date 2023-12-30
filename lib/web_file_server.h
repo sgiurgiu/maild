@@ -12,8 +12,6 @@
 
 namespace maild {
     
-class magic_handler;
-
 class web_file_server
 {
 public:
@@ -27,7 +25,6 @@ private:
     std::string get_mime_type(const std::string& file);
 private:
     std::string path;    
-    std::unique_ptr<magic_handler> magic;
 };
 }
 
