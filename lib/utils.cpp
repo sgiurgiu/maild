@@ -150,53 +150,14 @@ namespace
         {
             /* message/rfc822 or message/news */
             GMimeMessage *message;
-
-            /* g_mime_message_foreach() won't descend into
-                       child message parts, so if we want to count any
-                       subparts of this child message, we'll have to call
-                       g_mime_message_foreach() again here. */
-
             message = g_mime_message_part_get_message((GMimeMessagePart *)part);
             g_mime_message_foreach(message, gmime_get_part, message_part);
         }
-        /*else if (GMIME_IS_MULTIPART(part))
-        {
-            GMimeMultipart *mpart = GMIME_MULTIPART(part);
-            int count = g_mime_multipart_get_count(mpart);
-            for (int i = 0; i < count; i++)
-            {
-                GMimeObject *subpart = g_mime_multipart_get_part(mpart, i);
-                auto contentType = g_mime_object_get_content_type(subpart);
-                auto subType = g_mime_content_type_get_media_subtype(contentType);
-                for (const auto &type : message_part->types)
-                {
-                    if (type == subType)
-                    {
-                        auto content = g_mime_part_get_content((GMimePart *)subpart);
-                        auto output_stream = g_mime_stream_mem_new();
-                        auto message_length = g_mime_data_wrapper_write_to_stream(content, output_stream);
-                        std::string body;
-                        body.resize(message_length+1);
-                        auto message_length_read = g_mime_stream_read(output_stream, body.data(), message_length);
-                        g_object_unref(output_stream);
-                        if(message_length_read < 0)
-                        {
-                            body = "N/A";
-                        }
-                        
-                        message_part->body = body;
-                        return;
-                    }
-                }
-                return;
-            }
-        }*/
         else if (GMIME_IS_PART(part))
         {
             /* a normal leaf part, could be text/plain or
                 * image/jpeg etc */
             auto contentType = g_mime_object_get_content_type(part);
-            //auto subType = g_mime_content_type_get_media_subtype(contentType);
             for (const auto &type : message_part->types)
             {
                 if (g_mime_content_type_is_type(contentType, "text", type.c_str()))
