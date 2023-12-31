@@ -55,31 +55,6 @@ void web_server::run()
         return resp; 
     });
 
-    CROW_ROUTE(app, "/<path>").methods("GET"_method)([&file_server](const std::string &path)
-    {   
-        auto response = file_server.get_file_contents(path);
-        crow::response resp;
-        resp.code = response.result_int();
-        resp.body = response.body();
-        for(const auto& h : response)
-        {
-            resp.add_header(h.name_string(), h.value());
-        }
-        return resp; 
-    });
-
-    CROW_ROUTE(app, "/").methods("GET"_method)([&file_server]()
-    {   
-        auto response = file_server.get_file_contents("index.html");
-        crow::response resp;
-        resp.code = response.result_int();
-        resp.body = response.body();
-        for(const auto& h : response)
-        {
-            resp.add_header(h.name_string(), h.value());
-        }
-        return resp; 
-    });
     for (const auto &ip : options.get_ips())
     {
         spdlog::info("Binding to ip {}", ip);
