@@ -1,5 +1,4 @@
 #include "data_command.h"
-#include "utils.h"
 
 #include <istream>
 #include <ostream>

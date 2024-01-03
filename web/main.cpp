@@ -1,8 +1,8 @@
 #include "options.h"
 #include "options_parser.h"
 
-#include <web_options.h>
-#include <web_server.h>
+#include "web_options.h"
+#include "web_server.h"
 
 #include <iostream>
 #include <fstream>
@@ -61,10 +61,11 @@ int main(int argc, char **argv) {
         }
     }
 
+    int return_code = EXIT_SUCCESS;
+    g_mime_init();
+
     try
-    {
-        g_mime_init();
-        
+    {        
         spdlog::info( "Starting MailDWeb server...");
         web_server server(options);
         server.run();
@@ -74,13 +75,15 @@ int main(int argc, char **argv) {
     {
         std::cerr << ex.what() << std::endl;
         spdlog::error("Error occurred, shutting down. Cause: {}",ex.what());
-        return 1;
+        return_code = EXIT_FAILURE;
     }
     catch(...)
     {
       spdlog::error( "Error occurred, shutting down.");
-      return 1;
+      return_code = EXIT_FAILURE;
     }
-    
-    return 0;
+
+    g_mime_shutdown();
+
+    return return_code;
 }
